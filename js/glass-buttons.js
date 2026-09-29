@@ -30,8 +30,12 @@
     const lift = !(opts.noLift && el.matches(opts.noLift));
     const dark = !!(opts.dark && el.matches(opts.dark));
     if (dark) el.classList.add('sr-btn-gloss--dark');
-    const fx = kit.mountGlassButton(el, {lift, settings: dark ? darkSettings : settings});
-    if (window.srxpGloss) window.srxpGloss.decorate(el);
+    // Paint-filled buttons (.sr-btn-apply): keep the shell, lift, silver edge and its travelling light, but no
+    // glass ripple and no face sweep — the fluid fill (js/apply-paint.js) is their hover effect.
+    const paint = el.matches('.sr-btn-apply');
+    const chosen = dark ? darkSettings : settings;
+    const fx = kit.mountGlassButton(el, {lift, settings: paint ? {...chosen, strength: 0, dispersion: 0, glow: 0, sheen: 0, coreGlow: 0, stretch: 0} : chosen});
+    if (window.srxpGloss) window.srxpGloss.decorate(el, {reflection: !paint});
     else {
       const clip = el.querySelector(':scope > .sr-button-visual > .sr-button-clip');
       if (clip && !clip.querySelector(':scope > .sr-btn-finish')) {
