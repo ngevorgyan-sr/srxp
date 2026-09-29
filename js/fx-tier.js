@@ -10,7 +10,8 @@
       downgrades (iOS Low Power Mode's 30 fps cap stays full). The result is
       remembered for 7 days so slow devices don't stutter on every visit.
 
-   Overrides for testing: ?fx=lite or ?fx=full (also remembered; ?fx=auto clears).
+   Overrides for testing: ?fx=lite or ?fx=full (also remembered; ?fx=auto clears);
+   ?fx=touch pretends this is a touch device (not remembered).
    API: window.srxpFx.{lite, reason, onDowngrade(fn), downgrade(reason), probe()} */
 (() => {
   const KEY = 'srxp:fx', WEEK = 7 * 864e5;
@@ -49,8 +50,11 @@
 
   const listeners = new Set();
   let probed = false;
+  // Touch devices: no hover, so the ripple/sweep never read well and cost frames — effects switch to a still finish with tilt-driven edge light.
+  const touch = param === 'touch' || (window.matchMedia && matchMedia('(hover: none) and (pointer: coarse)').matches);
   const api = {
     get lite() { return lite; },
+    get touch() { return touch; },
     get reason() { return reason; },
     onDowngrade(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     downgrade(why) {

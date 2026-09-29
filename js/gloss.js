@@ -38,20 +38,45 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopAll(); });
 
   window.srxpGloss = {
-    // {reflection:false} = no white sweep across the face (paint-filled buttons); the edge light still travels
-    decorate(el, {reflection = true} = {}) {
+    // {reflection:false} = no white sweep across the face (paint-filled buttons); the edge light still travels.
+    // {interactive:false} = no pointer/click animation (touch devices) — the edge light is driven by enableTilt() instead.
+    decorate(el, {reflection = true, interactive = true} = {}) {
       const clip = el.querySelector(':scope > .sr-button-visual > .sr-button-clip');
       if (!clip || clip.querySelector(':scope > .sr-gloss')) return;
       el.classList.add('sr-btn-gloss');
       const edge = layer('sr-gloss-edge'), light = document.createElement('span');
       light.className = 'sr-gloss-edge-light'; edge.append(light);
       clip.prepend(layer('sr-gloss-body'), ...(reflection ? [layer('sr-gloss-reflection')] : []), edge);
+      io.observe(el);
+      if (!interactive) return;
       el.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') play(el); });
       el.addEventListener('focus', () => { if (el.matches(':focus-visible')) play(el); });
       el.addEventListener('click', () => play(el));
-      io.observe(el);
     },
     play,
+    // Touch devices: rotate every visible edge light with the phone's tilt (deviceorientation).
+    // iOS needs a permission request from a user gesture, so it arms on the first tap; Android streams right away.
+    get tilt() { return this._tiltState || null; }, // debug: {target, current, visible}
+    enableTilt() {
+      if (this._tilt) return; this._tilt = true;
+      let target = 0, current = 0, raf = 0;
+      const self = this; const report = () => { self._tiltState = {target, current: +current.toFixed(1), visible: visible.size}; };
+      const apply = () => {
+        raf = 0; current += (target - current) * 0.18;
+        const t = `translateY(-50%) rotate(${current.toFixed(1)}deg)`;
+        for (const l of document.querySelectorAll('.sr-gloss-edge-light')) l.style.transform = t; // a handful of elements: cheaper than tracking visibility
+        if (Math.abs(target - current) > 0.05) raf = requestAnimationFrame(apply);
+      };
+      const onOrient = e => { if (e.gamma == null) return; target = e.gamma * 2 + (e.beta || 0); report(); if (!raf) raf = requestAnimationFrame(apply); };
+      report();
+      // Listen right away (Android streams without asking); iOS delivers nothing until permission is
+      // granted from a user gesture, so also ask on the first tap — events then simply start arriving.
+      window.addEventListener('deviceorientation', onOrient);
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const arm = () => { document.removeEventListener('pointerdown', arm); DeviceOrientationEvent.requestPermission().catch(() => {}); };
+        document.addEventListener('pointerdown', arm);
+      }
+    },
     forget(el) { stop(el); visible.delete(el); io.unobserve(el); },
     setDuration(fn) { duration = fn; },
   };

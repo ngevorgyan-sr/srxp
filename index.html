@@ -84,7 +84,7 @@ p{text-wrap:pretty}
 .sr-gloss-body{background:linear-gradient(-75deg,rgba(255,255,255,.05),rgba(255,255,255,.2),rgba(255,255,255,.05)),rgba(0,0,0,.065);box-shadow:inset 0 1.9375px 1.9375px rgba(0,0,0,.05),inset 0 -1.9375px 1.9375px rgba(255,255,255,.5),inset 0 0 1.55px 3.875px rgba(255,255,255,.2)}
 .sr-gloss-reflection{background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.16) 42%,rgba(255,255,255,.68) 49%,rgba(255,255,255,.68) 51%,rgba(255,255,255,.16) 58%,transparent 65%);mix-blend-mode:screen;opacity:0}
 .sr-gloss-edge{z-index:3;border:1px solid rgba(0,0,0,.2)}
-.sr-gloss-edge-light{display:none}
+.sr-gloss-edge-light{display:none;will-change:transform}
 @supports ((mask-composite:exclude) or (-webkit-mask-composite:xor)){
   .sr-gloss-edge{padding:1px;border:0;background:rgba(255,255,255,.5);overflow:hidden;
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
@@ -144,9 +144,9 @@ html.gated body{overflow:hidden}
 /* SR008 interactive paint (js/paint-text.js): an aria-hidden clone of the title where only .vt is visible
    masks the fluid canvas to those glyphs; the still poster is the no-support fallback */
 .gate h1.is-painted .vt{background:none}
-.paint-layer{position:absolute;inset:0;pointer-events:none;user-select:none;isolation:isolate;-webkit-mask-image:linear-gradient(#000 0 0);-webkit-mask-clip:text}
+.paint-layer{position:absolute;inset:-.15em -.12em;padding:.15em .12em;pointer-events:none;user-select:none;isolation:isolate;-webkit-mask-image:linear-gradient(#000 0 0);-webkit-mask-clip:text} /* inset+padding cancel out for the text but widen the mask box, so overhanging glyph ink (e.g. the s of "As") isn't clipped on iOS */
 .paint-layer .pl-hide{visibility:hidden}
-.paint-layer .paint{position:absolute;inset:-.12em -.06em;z-index:-1;border-radius:0;aspect-ratio:auto!important} /* runtime sets an inline aspect-ratio that would override the insets */
+.paint-layer .paint{position:absolute;inset:0;z-index:-1;border-radius:0;aspect-ratio:auto!important} /* runtime sets an inline aspect-ratio that would override the insets */
 .gate-form{flex:none;width:min(var(--gate-form),100%);display:flex;flex-direction:column;gap:16px;padding-bottom:.4em} /* same width at every breakpoint */
 .gate-form p.lede{font-size:18px;font-weight:600;color:var(--sr-text-primary);max-width:36ch}
 .gate-row{display:flex;flex-direction:column;gap:8px}
@@ -199,8 +199,10 @@ html.gated body{overflow:hidden}
 .masthead-side{display:flex;flex-direction:column;gap:12px;max-width:300px}
 .masthead-side p{font-weight:600}
 
-.tools{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:12px var(--gutter);border-bottom:var(--sr-stroke-soft);position:sticky;top:57px;z-index:90;background:var(--sr-bg-base)}
-.seg{display:flex;gap:4px;flex-wrap:wrap}
+.tools{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:nowrap;padding:12px var(--gutter);border-bottom:var(--sr-stroke-soft);position:sticky;top:57px;z-index:90;background:var(--sr-bg-base)}
+.seg{display:flex;gap:4px;flex-wrap:nowrap}
+@media (max-width:719px){.tools{gap:12px}.tools .seg button{font-size:12px;padding:5px 8px;letter-spacing:.04em}}
+@media (max-width:400px){.tools{gap:8px}.tools .seg button{font-size:11px;padding:4px 6px}.tools .seg sup{margin-left:3px}}
 .seg button{appearance:none;border:var(--sr-stroke-soft);background:transparent;cursor:pointer;padding:6px 10px;border-radius:var(--sr-radius-xs);font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:13px;line-height:16px;transition:background .15s,color .15s}
 .seg button:hover{background:var(--sr-wash-soft)}
 .seg button[aria-pressed="true"]{background:var(--sr-text-primary);color:var(--sr-text-inverse);border-color:var(--sr-text-primary)}
@@ -353,7 +355,7 @@ footer:has(.proto-fab) > .label:last-child{justify-self:end}
 .proto-modes input{position:absolute;opacity:0;width:0;height:0;margin:0}
 .proto-reset{appearance:none;cursor:pointer;font:inherit;font-size:13px;font-weight:600;padding:8px 10px;border-radius:var(--sr-radius-sm);border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--sr-bg-base)}
 .proto-reset:hover{background:rgba(255,255,255,.1)}
-@media (max-width:440px){footer:has(.proto-fab){grid-template-columns:1fr auto}footer:has(.proto-fab) .proto-fab{grid-column:1/-1;order:1;justify-content:flex-start}} /* only when SR.XP + chip + copyright can't share a row */
+@media (max-width:440px){footer:has(.proto-fab){grid-template-columns:auto auto 1fr}footer:has(.proto-fab) > .label:last-child{white-space:normal;text-align:right;line-height:16px}footer:has(.proto-fab) .proto-fab{padding:12px 12px;margin:-12px -12px}.proto-chip{padding:5px 10px;font-size:11px}} /* phones: all three stay on one footer row; the copyright wraps to two lines */
 @media (max-width:719px){.proto-panel{position:fixed;left:16px;right:16px;bottom:72px;width:auto;transform:translateY(4px)}
   .proto-fab:not(.snooze):hover .proto-panel,.proto-fab:focus-within .proto-panel,.proto-fab.open .proto-panel{transform:none}}
 /* ===== end PROTOTYPE ONLY ===== */

@@ -15,6 +15,9 @@
   const kit = window.SpeedrunGlass, tier = window.srxpFx;
   // Lite tier (js/fx-tier.js): no ripple/shimmer; buttons keep the static CSS gloss.
   if (!kit || (tier && tier.lite)) return;
+  // Touch devices: keep the shell and silver edge, drop ripple and face sweep (slow, and invisible without hover);
+  // the edge light follows the phone's tilt instead (srxpGloss.enableTilt).
+  const touch = !!(tier && tier.touch);
   const opts = window.SRXP_GLASS || {};
   const preset = kit.getGlassPreset();
   const boost = opts.boost || 1;
@@ -32,10 +35,10 @@
     if (dark) el.classList.add('sr-btn-gloss--dark');
     // Paint-filled buttons (.sr-btn-apply): keep the shell, lift, silver edge and its travelling light, but no
     // glass ripple and no face sweep — the fluid fill (js/apply-paint.js) is their hover effect.
-    const paint = el.matches('.sr-btn-apply');
+    const paint = el.matches('.sr-btn-apply'), still = paint || touch;
     const chosen = dark ? darkSettings : settings;
-    const fx = kit.mountGlassButton(el, {lift, settings: paint ? {...chosen, strength: 0, dispersion: 0, glow: 0, sheen: 0, coreGlow: 0, stretch: 0} : chosen});
-    if (window.srxpGloss) window.srxpGloss.decorate(el, {reflection: !paint});
+    const fx = kit.mountGlassButton(el, {lift, settings: still ? {...chosen, strength: 0, dispersion: 0, glow: 0, sheen: 0, coreGlow: 0, stretch: 0} : chosen});
+    if (window.srxpGloss) window.srxpGloss.decorate(el, {reflection: !still, interactive: !touch});
     else {
       const clip = el.querySelector(':scope > .sr-button-visual > .sr-button-clip');
       if (clip && !clip.querySelector(':scope > .sr-btn-finish')) {
@@ -73,6 +76,7 @@
   });
 
   scan(document.body);
+  if (touch && window.srxpGloss) window.srxpGloss.enableTilt();
 
   // Label helper for scripts that change button text after mount.
   window.srxpSetLabel = (btn, text) => {

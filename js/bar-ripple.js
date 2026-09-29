@@ -9,7 +9,7 @@
 (() => {
   const kit = window.SpeedrunGlass, tier = window.srxpFx;
   const bar = document.querySelector('.bar'), inner = bar?.querySelector('.bar-inner');
-  if (!kit || !inner || (tier && tier.lite)) return;
+  if (!kit || !inner || (tier && (tier.lite || tier.touch))) return; // off in lite mode and on touch devices
   const base = kit.getGlassPreset().button, b = {...base, ...(window.SRXP_GLASS?.settings || {})};
   const fx = kit.mountGlassQuote(bar, {
     content: inner, scroll: false, headerOffset: 0,

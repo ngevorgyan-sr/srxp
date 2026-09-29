@@ -54,6 +54,10 @@ Edit the `CONTENT` object near the bottom of `index.html`: `applyUrl`, `items` (
 - **Top bar**: the same dark tuning, with stretch capped to ~2px at any width.
 - **"Start your SR008 App"** (`js/apply-paint.js`): same glass shell, silver gloss edge and ripple as the other buttons, but with the glass ripple and the white face sweep turned off (ripple optics zeroed in `js/glass-buttons.js`; `srxpGloss.decorate(el, {reflection:false})`); the hover lift and the travelling edge light stay. The fill is a second instance of the fluid runtime showing the middle of `assets/apply-paint.png`; moving the pointer over it stirs the paint (no automatic motion on hover). White semi-bold label, unaffected by the warp. Lite tier and no-JS show the still texture via CSS.
 
+## Touch devices
+
+On phones and tablets (`(hover: none) and (pointer: coarse)`, or `?fx=touch` to test on a desktop) the glass ripple, face sweep and top-bar ripple are off: hover doesn't exist there and the ripple cost frames. Buttons keep the glass shell and the silver edge, and the edge's travelling light is rotated by the device's tilt (`deviceorientation`, via `srxpGloss.enableTilt()`). iOS only provides motion data after a permission prompt, which is requested on the first tap; Android streams immediately. The fluid paint (headline and apply button) still runs and still responds to touch drags, subject to the performance tiers below.
+
 ## Performance tiers (`js/fx-tier.js`)
 
 Capable devices always get full effects. Lite (static paint and static gloss, no WebGL, no ripples) is used only for unambiguous signals: reduced-motion, data-saver, a 2g connection, ≤2 GB memory, ≤2 CPU cores, or no real GPU. Otherwise it measures real frame times after the paint starts, and downgrades only below ~25 fps median (iOS Low Power Mode's 30 fps stays full). The decision is cached for 7 days in `localStorage` (`srxp:fx`).
