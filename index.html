@@ -87,7 +87,6 @@ p{text-wrap:pretty}
   .sr-gloss-edge{padding:1px;border:0;background:rgba(255,255,255,.5);overflow:hidden;
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
   .sr-gloss-edge-light{display:block;position:absolute;left:-50%;top:50%;width:200%;aspect-ratio:1;background:conic-gradient(from -75deg,rgba(0,0,0,.5),transparent 5% 40%,rgba(0,0,0,.5) 50%,transparent 60% 95%,rgba(0,0,0,.5));transform:translateY(-50%)}
-  .sr-btn-apply .sr-gloss-edge{background:var(--sr-gradient-prism-primary)}
 }
 /* Dark gloss (buttons on dark surfaces, e.g. Add to Calendar in the Unlocked card): light label,
    light tint and edge, light sweep travelling round the stroke; ripple uses SR "03 Flat Black" tuning */
@@ -285,17 +284,17 @@ html.gated body{overflow:hidden}
 /* venue + ID note: one size/weight, tight leading between them */
 .box.ok > .label{color:var(--sr-success)} /* "Unlocked · You're Approved" in the same neon green as Open tags */
 .ok-info{display:flex;flex-direction:column;gap:4px}
-.ok-info + .sr-btn{margin-top:4px} /* optically matches the eyebrow→venue gap (text leading vs. button edge) */
+.ok-info + .ok-ctas{margin-top:4px} /* optically matches the eyebrow→venue gap (text leading vs. button edge) */
+.ok-ctas{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ok-ctas .sr-btn-apply{margin-left:auto} /* stays right-aligned even when the row wraps */
 .ok-info p{font-size:18px;font-weight:700;line-height:24px;letter-spacing:-.01em;color:var(--sr-text-inverse)}
 /* TBD reads as part of the venue line here, not as a tag */
 .ok-info .sr-tag--tbd{font:inherit;letter-spacing:inherit;text-transform:none;padding:0;border:0;border-radius:0;background:none;color:inherit;display:inline}
-.sr-btn-apply{color:var(--sr-text-primary)}
-.sr-btn-apply:not(.sr-glass-kit-button),.sr-btn-apply .sr-btn-finish{border:1px solid transparent;border-radius:var(--sr-radius-xs);background:linear-gradient(180deg,#F7F7F7,#EDEDED) padding-box,linear-gradient(90deg,var(--sr-prism-purple),var(--sr-prism-aqua-lit),var(--sr-prism-cream)) border-box;box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(0,0,0,.08),0 8px 24px -6px rgba(143,78,254,.45);transition:box-shadow .25s,transform .2s}
-.sr-btn-apply:hover{opacity:1}
-.sr-btn-apply:not(.sr-glass-kit-button):hover,.sr-glass-kit-button.sr-btn-apply:hover .sr-btn-finish{box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(0,0,0,.08),0 12px 32px -6px rgba(86,250,247,.6)}
-.sr-btn-apply:not(.sr-glass-kit-button):active{transform:translateY(1px)}
-.sr-glass-kit-button.sr-btn-apply > .sr-button-visual{box-shadow:0 1px 1px rgba(0,0,0,.08),0 8px 24px -6px rgba(143,78,254,.45);transition:box-shadow .25s}
-.sr-glass-kit-button.sr-btn-apply:hover > .sr-button-visual{box-shadow:0 1px 1px rgba(0,0,0,.08),0 12px 32px -6px rgba(86,250,247,.6)}
+/* "Start your SR008 App": white label over a live paint fill (js/apply-paint.js) inside the standard gloss shell */
+.sr-btn-apply,.sr-btn-apply.sr-btn-gloss--dark{color:var(--sr-text-inverse);font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.sr-btn-apply .sr-gloss-body{display:none}
+.sr-btn-paint{position:absolute;inset:0;z-index:0;border-radius:inherit;overflow:hidden;pointer-events:none;aspect-ratio:auto!important;background:url("assets/apply-paint.png") center/136.3% auto no-repeat}
+.sr-btn-paint canvas{border-radius:inherit}
 
 /* sticky footer: on short pages the footer sits at the bottom of the window */
 body{display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
@@ -357,7 +356,7 @@ footer:has(.proto-fab) > .label:last-child{justify-self:end}
   backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);transition:background .2s,transform .2s var(--ease)}
 .sr-btn:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud,.sr-btn-apply):not(.sr-glass-kit-button):hover{background:linear-gradient(-75deg,rgba(255,255,255,.08),rgba(255,255,255,.28),rgba(255,255,255,.08)),rgba(0,0,0,.05)}
 .sr-btn:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud,.sr-btn-apply):not(.sr-glass-kit-button):active{transform:translateY(1px)}
-.sr-btn.sr-btn-apply:not(.sr-glass-kit-button){border-color:transparent;
+.sr-btn.sr-btn-apply:not(.sr-glass-kit-button){color:var(--sr-text-inverse);border-color:rgba(255,255,255,.55);background:url("assets/apply-paint.png") center/136.3% auto no-repeat;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25),0 3.875px 1.9375px -1.9375px rgba(0,0,0,.2)}
   background:linear-gradient(-75deg,rgba(255,255,255,.05),rgba(255,255,255,.2),rgba(255,255,255,.05)) padding-box,linear-gradient(rgba(0,0,0,.065),rgba(0,0,0,.065)) padding-box,linear-gradient(var(--sr-bg-base),var(--sr-bg-base)) padding-box,var(--sr-gradient-prism-primary) border-box}
 .box.ok .sr-btn:not(.sr-glass-kit-button){color:var(--sr-bg-base);border-color:rgba(255,255,255,.28);
   background:linear-gradient(-75deg,rgba(255,255,255,.04),rgba(255,255,255,.14),rgba(255,255,255,.04)),rgba(255,255,255,.08);
@@ -553,11 +552,11 @@ const CONTENT = {
     const req = store.get("req:"+it.n), un = isUnlocked(it);
     let action = "";
     if (it.type === "Event"){
-      action = un ? `<div class="box ok"><span class="label">Unlocked · You're Approved</span><div class="ok-info"><p>${val(it.venue)}</p><p>Bring a photo ID. Doors at ${esc(it.time.split("–")[0])} PM.</p></div><a class="sr-btn sr-btn-hud sr-btn--md" href="${calUrl(it)}" target="_blank" rel="noopener" style="align-self:flex-start"><span class="sr-prism-material" aria-hidden="true"></span><span class="t">Add to Calendar</span></a></div>`
+      action = un ? `<div class="box ok"><span class="label">Unlocked · You're Approved</span><div class="ok-info"><p>${val(it.venue)}</p><p>Bring a photo ID. Doors at ${esc(it.time.split("–")[0])} PM.</p></div><div class="ok-ctas"><a class="sr-btn sr-btn-hud sr-btn--md" href="${calUrl(it)}" target="_blank" rel="noopener"><span class="sr-prism-material" aria-hidden="true"></span><span class="t">Add to Calendar</span></a><a class="sr-btn sr-btn-apply sr-btn--md" href="${CONTENT.applyUrl}" target="_blank" rel="noopener">Start your SR008 app</a></div></div>`
         : `<div class="box">
           <div class="box-head"><span class="label">${req ? (onList(it) ? 'Approved' : 'Requested') : 'Request Access'}</span><p>${req ? (onList(it) ? 'You\'re approved. We just emailed your password to ' + esc((store.get("access")||{}).email||"you") + '. Enter it below to see the address.' : 'You\'re on the list. Approved guests get a password by email before the event.') : 'Capacity is limited. Approvals are based on your SR008 application, so use the same email.'}</p></div>
-          ${req && onList(it) ? '' : `<div class="cta-pair${req ? ' one' : ''}">${req ? '' : '<button class="sr-btn sr-btn-primary" type="button" id="sh-req">Request access</button>'}<a class="sr-btn sr-btn-apply" href="${CONTENT.applyUrl}" target="_blank" rel="noopener">Start your SR008 app</a></div>`}
-          <form class="pw-inline" id="sh-pw" novalidate><input class="sr-input" id="sh-pw-in" placeholder="${req && onList(it) ? 'Enter your password' : 'Have a password?'}" aria-label="Event password" autocomplete="off" spellcheck="false"><button class="sr-btn sr-btn-ghost sr-btn--md" type="submit">Unlock</button></form><p class="err" id="sh-err" hidden></p>
+          <div class="cta-pair${req ? ' one' : ''}">${req ? '' : '<button class="sr-btn sr-btn-primary" type="button" id="sh-req">Request access</button>'}<a class="sr-btn sr-btn-apply" href="${CONTENT.applyUrl}" target="_blank" rel="noopener">Start your SR008 app</a></div>
+          ${req && !onList(it) ? '' : `<form class="pw-inline" id="sh-pw" novalidate><input class="sr-input" id="sh-pw-in" placeholder="${req ? 'Enter your password' : 'Have a password?'}" aria-label="Event password" autocomplete="off" spellcheck="false"><button class="sr-btn sr-btn-ghost sr-btn--md" type="submit">Unlock</button></form><p class="err" id="sh-err" hidden></p>`}
         </div>`;
     } else if (it.type === "Object") action = `<div class="box"><span class="label">How to Get One</span><p style="font-weight:600">Request access to any event above. Pick up at the door while supplies last.</p></div>`;
     else action = `<div class="box"><span class="label">Members First</span><p style="font-weight:600">You're registered. We'll email you the moment this goes live.</p></div>`;
@@ -642,6 +641,7 @@ const CONTENT = {
 <script src="js/glass-preset.js"></script>
 <script src="vendor/glass/glass-effects.global.js"></script>
 <script src="js/glass-buttons.js"></script>
+<script src="js/apply-paint.js"></script>
 <script src="js/bar-ripple.js"></script>
 </body>
 </html>

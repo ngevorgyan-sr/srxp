@@ -23,9 +23,10 @@ Testing switches (append to the URL): `?fx=lite` forces the still/low-end mode, 
 | `js/glass-preset.js` | **Locked button settings** (exported from Glass Studio). |
 | `js/glass-buttons.js` | Mounts the refractive glass ripple on every `.sr-btn`, including buttons added later. |
 | `js/bar-ripple.js` | Dark shimmer ripple across the Index top bar (hover from any edge, or click). |
+| `js/apply-paint.js` | Live paint fill inside the "Start your SR008 App" button (fluid runtime on a layer under the label; hover sweeps and stirs it). |
 | `vendor/fluid/fluid-header.js` | SR008 banner fluid runtime (WebGL2). Readable copy with two sr.xp patches, marked `sr.xp patch`: a live `set()` method, and mirrored texture edges. |
 | `vendor/glass/` | speedrun website glass-effects kit (unmodified build). |
-| `assets/` | Event photo, marble fallback, paint texture. `paint-source.data.js` is the paint as embedded data, only fetched when opened from `file://`. |
+| `assets/` | Event photo, marble fallback, headline paint texture, `apply-paint.png` (button fill: 308×107, the 226×47 art centred with warp headroom around it). The `*.data.js` files are the same images as embedded data, only fetched when opened from `file://`. |
 | `fonts/` | Messina Sans cuts used by the page. |
 | `tools/serve.py` | No-cache local preview server. |
 
@@ -50,6 +51,7 @@ Edit the `CONTENT` object near the bottom of `index.html`: `applyUrl`, `items` (
 - **Fluid paint** (`js/paint-text.js`): an aria-hidden clone of the headline shows only the painted words, and `-webkit-mask-clip:text` clips the WebGL canvas to those glyphs. The real headline stays selectable, accessible text. Locked framing: `{zoom 1.2, x 0.444, y 0.586}`. Locked fluid: curl 10, brush 0.08, warp depth 0.16 (other banner values commented inline). Firefox lacks mask-clip:text and shows the static marble fill.
 - **Buttons**: SR glass ripple (`js/glass-preset.js`) under the Grey Gloss finish (`js/gloss.js`). Buttons inside the dark "Unlocked" card get the dark variant (SR "03 Flat Black" tuning: iridescence ×1.6875, ring highlight ×4/3).
 - **Top bar**: the same dark tuning, with stretch capped to ~2px at any width.
+- **"Start your SR008 App"** (`js/apply-paint.js`): same glass shell, silver gloss edge and ripple as the other buttons, but the fill is a second instance of the fluid runtime showing the middle of `assets/apply-paint.png`; hovering sweeps a brush across it from the entry side and pointer movement stirs it. White label, unaffected by the warp. Lite tier and no-JS show the still texture via CSS.
 
 ## Performance tiers (`js/fx-tier.js`)
 

@@ -70,6 +70,7 @@ const DEFAULTS = {
   logoLiquidEdgeAngle: -65,
   idleFps: 24,
   touchMode: 'horizontal',
+  allowInteractive: false, // sr.xp patch: accept pointers whose target is a link/button (paint inside a CTA)
   respectReducedMotion: true,
   fadeMs: 300,
   onReady: null,
@@ -1406,6 +1407,7 @@ function mount (container, options = {}) {
   }
 
   function interactiveTarget (event) {
+    if (cfg.allowInteractive) return false; // sr.xp patch
     return event.target instanceof Element &&
       Boolean(event.target.closest('a,button,input,select,textarea,[contenteditable="true"]'));
   }
