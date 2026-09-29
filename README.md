@@ -56,7 +56,7 @@ Edit the `CONTENT` object near the bottom of `index.html`: `applyUrl`, `items` (
 
 ## Touch devices
 
-On phones and tablets (`(hover: none) and (pointer: coarse)`, or `?fx=touch` to test on a desktop) the glass ripple, face sweep and top-bar ripple are off: hover doesn't exist there and the ripple cost frames. Buttons keep the glass shell and the silver edge, and the edge's travelling light is rotated by the device's tilt (`deviceorientation`, via `srxpGloss.enableTilt()`). iOS only provides motion data after a permission prompt, which is requested on the first tap; Android streams immediately. The fluid paint (headline and apply button) still runs and still responds to touch drags, subject to the performance tiers below.
+On phones and tablets (`(hover: none) and (pointer: coarse)`, or `?fx=touch` to test on a desktop) the glass ripple, face sweep and top-bar ripple are off: hover doesn't exist there and the ripple cost frames. Buttons keep the glass shell and the silver edge, and the edge's travelling light keeps moving without hover (`srxpGloss.enableTilt()`): it follows device tilt where the browser provides it without a prompt (Android Chrome), turns with scrolling (page and event sheet), and drifts slowly when idle (off under `prefers-reduced-motion`). No permission is ever requested — iOS gates motion sensors behind a prompt, so iPhones get the scroll + drift behaviour. The fluid paint (headline and apply button) still runs and still responds to touch drags, subject to the performance tiers below.
 
 ## Performance tiers (`js/fx-tier.js`)
 
