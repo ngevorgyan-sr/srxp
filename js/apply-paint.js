@@ -1,16 +1,23 @@
 /* sr.xp — live paint fill for "Start your SR008 App" (.sr-btn-apply).
    Mounts the SR008 fluid runtime (vendor/fluid) on a layer inside the button's
    glass clip, under the label, so the ripple and silver gloss edge stay and only
-   the fill moves. The texture (assets/apply-paint.png, 308×107) holds the 226×47
-   button art in its middle; the margins are headroom so the warp never runs out
-   of paint. Hovering sweeps a brush across the fill from the entry side, and
+   the fill moves. The texture (assets/apply-paint.png) is read at its natural
+   size; the button shows its middle (12% inset on every side), and the margins
+   are headroom so the warp never runs out of paint. Swap the file freely. Hovering sweeps a brush across the fill from the entry side, and
    moving the pointer stirs it. Off in the lite tier (CSS shows the still fill). */
 (() => {
   const FH = window.FluidHeader, tier = window.srxpFx;
   if (!FH || (tier && tier.lite)) return;
-  const TEX = {w: 308, h: 107, mid: {x: 41, y: 30, w: 226, h: 47}};
-  let src = 'assets/apply-paint.png';
+  const INSET = 0.12;
+  let src = 'assets/apply-paint.png', TEX = null;
   const live = new Map();
+  function withTexture(cb) {
+    if (TEX) return cb();
+    const im = new Image();
+    im.onload = () => { const w = im.naturalWidth, h = im.naturalHeight; TEX = {w, h, mid: {x: w * INSET, y: h * INSET, w: w * (1 - 2 * INSET), h: h * (1 - 2 * INSET)}}; cb(); };
+    im.onerror = () => {}; // texture missing: the CSS still fill stays
+    im.src = src;
+  }
 
   // The middle section, widened/heightened to the button's aspect, centred, kept inside the texture.
   function sourceRect(paint) {
@@ -25,6 +32,7 @@
 
   function mount(el) {
     if (live.has(el) || !el.isConnected) return;
+    if (!TEX) { withTexture(() => mount(el)); return; }
     const clip = el.querySelector(':scope > .sr-button-visual > .sr-button-clip');
     if (!clip) { requestAnimationFrame(() => mount(el)); return; } // the glass kit wraps the button first
     const paint = document.createElement('span');
