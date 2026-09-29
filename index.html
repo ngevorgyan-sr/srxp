@@ -279,7 +279,7 @@ html.gated body{overflow:hidden}
 .mail b{font-size:17px;font-weight:800;letter-spacing:-.02em}
 .mail code{align-self:flex-start;font-family:ui-monospace,Menlo,monospace;font-size:18px;letter-spacing:.12em;padding:6px 10px;border-radius:var(--sr-radius-xs);background:var(--sr-bg-surface);border:var(--sr-stroke-soft)}
 /* skinny windows: the double CTA can't sit side by side, so Request access stays on top and the apply button drops below the password box */
-@media (max-width:480px){.cta-pair{grid-template-columns:1fr}.box > .cta-pair:not(.one){display:contents}.box > .cta-pair:not(.one) .sr-btn-apply{order:10}}
+@media (max-width:488px){.cta-pair{grid-template-columns:1fr}.box > .cta-pair:not(.one){display:contents}.box > .cta-pair:not(.one) .sr-btn-apply{order:10}} /* 488 = narrowest width where both labels stay on one line */
 .box.ok{background:var(--sr-text-primary);color:var(--sr-text-inverse);border-color:var(--sr-text-primary)}
 .box.ok .muted{color:rgba(255,255,255,.7)}
 /* venue + ID note: one size/weight, tight leading between them */
