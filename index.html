@@ -278,7 +278,8 @@ html.gated body{overflow:hidden}
 .mail-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .mail b{font-size:17px;font-weight:800;letter-spacing:-.02em}
 .mail code{align-self:flex-start;font-family:ui-monospace,Menlo,monospace;font-size:18px;letter-spacing:.12em;padding:6px 10px;border-radius:var(--sr-radius-xs);background:var(--sr-bg-surface);border:var(--sr-stroke-soft)}
-@media (max-width:480px){.cta-pair{grid-template-columns:1fr}}
+/* skinny windows: the double CTA can't sit side by side, so Request access stays on top and the apply button drops below the password box */
+@media (max-width:480px){.cta-pair{grid-template-columns:1fr}.box > .cta-pair:not(.one){display:contents}.box > .cta-pair:not(.one) .sr-btn-apply{order:10}}
 .box.ok{background:var(--sr-text-primary);color:var(--sr-text-inverse);border-color:var(--sr-text-primary)}
 .box.ok .muted{color:rgba(255,255,255,.7)}
 /* venue + ID note: one size/weight, tight leading between them */
@@ -558,9 +559,8 @@ const CONTENT = {
       action = un ? `<div class="box ok"><span class="label">Unlocked · You're Approved</span><div class="ok-info"><p>${val(it.venue)}</p><p>Bring a photo ID. Doors at ${esc(it.time.split("–")[0])} PM.</p></div><div class="ok-ctas"><a class="sr-btn sr-btn-hud sr-btn--md" href="${calUrl(it)}" target="_blank" rel="noopener"><span class="sr-prism-material" aria-hidden="true"></span><span class="t">Add to Calendar</span></a><a class="sr-btn sr-btn-apply sr-btn--md" href="${CONTENT.applyUrl}" target="_blank" rel="noopener">Start your SR008 app</a></div></div>`
         : `<div class="box">
           <div class="box-head"><span class="label">${req ? (onList(it) ? 'Approved' : 'Requested') : 'Request Access'}</span><p>${req ? (onList(it) ? 'You\'re approved. We just emailed your password to ' + esc((store.get("access")||{}).email||"you") + '. Enter it below to see the address.' : 'You\'re on the list. Approved guests get a password by email before the event.') : 'Capacity is limited. Approvals are based on your SR008 application, so use the same email.'}</p></div>
-          ${req ? '' : '<div class="cta-pair one"><button class="sr-btn sr-btn-primary" type="button" id="sh-req">Request access</button></div>'}
+          <div class="cta-pair${req ? ' one' : ''}">${req ? '' : '<button class="sr-btn sr-btn-primary" type="button" id="sh-req">Request access</button>'}<a class="sr-btn sr-btn-apply" href="${CONTENT.applyUrl}" target="_blank" rel="noopener">Start your SR008 app</a></div>
           ${req && !onList(it) ? '' : `<form class="pw-inline" id="sh-pw" novalidate><input class="sr-input" id="sh-pw-in" placeholder="${req ? 'Enter your password' : 'Have a password?'}" aria-label="Event password" autocomplete="off" spellcheck="false"><button class="sr-btn sr-btn-ghost sr-btn--md" type="submit">Unlock</button></form><p class="err" id="sh-err" hidden></p>`}
-          <div class="cta-pair one"><a class="sr-btn sr-btn-apply" href="${CONTENT.applyUrl}" target="_blank" rel="noopener">Start your SR008 app</a></div>
         </div>`;
     } else if (it.type === "Object") action = `<div class="box"><span class="label">How to Get One</span><p style="font-weight:600">Request access to any event above. Pick up at the door while supplies last.</p></div>`;
     else action = `<div class="box"><span class="label">Members First</span><p style="font-weight:600">You're registered. We'll email you the moment this goes live.</p></div>`;
