@@ -1,7 +1,7 @@
 /* sr.xp — live paint fill for "Start your SR008 App" (.sr-btn-apply).
    Mounts the SR008 fluid runtime (vendor/fluid) on a layer inside the button's
    glass clip, under the label, so the ripple and silver gloss edge stay and only
-   the fill moves. The texture (assets/apply-paint.png) is read at its natural
+   the fill moves. The texture (assets/apply-paint.webp, PNG fallback) is read at its natural
    size; the button shows its middle (12% inset on every side), and the margins
    are headroom so the warp never runs out of paint. Swap the file freely. Only
    the pointer moving over the button stirs the paint — no automatic motion on
@@ -10,14 +10,15 @@
   const FH = window.FluidHeader, tier = window.srxpFx;
   if (!FH || (tier && tier.lite)) return;
   const INSET = 0.12;
-  let src = 'assets/apply-paint.png', TEX = null;
+  let image = {webp: 'assets/apply-paint.webp', png: 'assets/apply-paint.png'}, TEX = null;
+  const firstSrc = () => (typeof image === 'string' ? image : image.webp || image.png);
   const live = new Map();
   function withTexture(cb) {
     if (TEX) return cb();
     const im = new Image();
     im.onload = () => { const w = im.naturalWidth, h = im.naturalHeight; TEX = {w, h, mid: {x: w * INSET, y: h * INSET, w: w * (1 - 2 * INSET), h: h * (1 - 2 * INSET)}}; cb(); };
-    im.onerror = () => {}; // texture missing: the CSS still fill stays
-    im.src = src;
+    im.onerror = () => { if (typeof image !== 'string' && im.src.endsWith('.webp')) { im.src = image.png; } }; // no WebP support: measure the PNG
+    im.src = firstSrc();
   }
 
   // The middle section, widened/heightened to the button's aspect, centred, kept inside the texture.
@@ -42,7 +43,7 @@
     clip.prepend(paint);
     const r = paint.getBoundingClientRect();
     const fx = FH.mount(paint, {
-      image: src, poster: null, allowInteractive: true,
+      image, poster: null, allowInteractive: true,
       referenceSize: {width: Math.round(r.width) || 1, height: Math.round(r.height) || 1}, sourceRect: sourceRect(paint),
       simResolution: 128, flowResolution: 256, dprCap: 2,
       // headline fluid values, scaled for a 48px-tall fill: broader brush, settles back sooner
@@ -88,7 +89,7 @@
   if (location.protocol === 'file:') {
     const tag = document.createElement('script');
     tag.src = 'assets/apply-paint.data.js';
-    tag.onload = () => { if (window.SRXP_APPLY_PAINT_DATA) src = window.SRXP_APPLY_PAINT_DATA; start(); };
+    tag.onload = () => { if (window.SRXP_APPLY_PAINT_DATA) image = window.SRXP_APPLY_PAINT_DATA; start(); };
     tag.onerror = start;
     document.head.append(tag);
   } else start();

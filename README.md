@@ -26,7 +26,7 @@ Testing switches (append to the URL): `?fx=lite` forces the still/low-end mode, 
 | `js/apply-paint.js` | Live paint fill inside the "Start your SR008 App" button (fluid runtime on a layer under the label; the pointer stirs it). |
 | `vendor/fluid/fluid-header.js` | SR008 banner fluid runtime (WebGL2). Readable copy with two sr.xp patches, marked `sr.xp patch`: a live `set()` method, and mirrored texture edges. |
 | `vendor/glass/` | speedrun website glass-effects kit (unmodified build). |
-| `assets/` | Event photo, marble fallback, headline paint texture, `apply-paint.png` (button fill; any size — the button shows its centre with a 12% margin as warp headroom). The `*.data.js` files are the same images as embedded data, only fetched when opened from `file://`; `tools/build-release.py` regenerates them, so to change a texture just replace the image and rebuild. |
+| `assets/` | Event photo, marble fallback, headline paint texture, `apply-paint.webp` + `.png` fallback (button fill; any size — the button shows its centre with a 12% margin as warp headroom; to change it, replace both files and rebuild). The `*.data.js` files are the same images as embedded data, only fetched when opened from `file://`; `tools/build-release.py` regenerates them, so to change a texture just replace the image and rebuild. |
 | `fonts/` | Messina Sans cuts used by the page. |
 | `tools/serve.py` | No-cache local preview server. |
 
