@@ -10,7 +10,9 @@
 (() => {
   const FH = window.FluidHeader;
   const zone = document.querySelector('[data-paint-zone]');
-  if (!FH || !zone || !zone.querySelector('[data-paint-text]') || !CSS.supports('-webkit-mask-clip', 'text')) return;
+  if (!zone || !zone.querySelector('[data-paint-text]')) return;
+  // No runtime or no text masking (Firefox): show the still fill instead, and only then download it.
+  if (!FH || !CSS.supports('-webkit-mask-clip', 'text')) { zone.classList.add('needs-fill'); return; }
   const gate = zone.closest('.gate');
 
   // Overlay: same markup, only the paint words visible, canvas behind them.

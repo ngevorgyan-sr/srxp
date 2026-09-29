@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="vendor/glass/glass-effects.css">
 <script src="js/fx-tier.js"></script>
 <link rel="preload" href="assets/paint-source.avif" as="image" type="image/avif">
+<script>/* font preloads: start the three used cuts downloading with the HTML (skipped from file://, where the CORS preload would fail) */
+if (location.protocol !== 'file:') for (const [f, t] of [['MessinaSans-Black.otf','font/otf'],['MessinaSans-VF-Upright.ttf','font/ttf'],['MessinaSans-CondensedRegular.ttf','font/ttf']]) { const l = document.createElement('link'); l.rel = 'preload'; l.as = 'font'; l.type = t; l.crossOrigin = 'anonymous'; l.href = 'fonts/' + f; document.head.append(l); }</script>
 <style>
 @font-face{font-family:"Messina Sans";src:url("fonts/MessinaSans-VF-Upright.ttf") format("truetype");font-weight:100 900;font-style:normal;font-display:swap}
 @font-face{font-family:"Messina Sans";src:url("fonts/MessinaSans-VF-Italic.ttf") format("truetype");font-weight:100 900;font-style:italic;font-display:swap}
@@ -137,9 +139,10 @@ html.gated body{overflow:hidden}
 .gate h1 .bB,.gate h1 .bC,.gate h1 .bD{display:none}
 .gate h1{position:relative;flex:none;white-space:nowrap;line-height:.9;letter-spacing:-.06em;margin-left:-.04em;
   font-size:min(calc((100svh - 2 * var(--gutter) - 120px) / 4.62),calc((100vw - 2 * var(--gutter) - var(--gate-gap) - var(--gate-form)) / 4.76))}
-.gate h1 .vt{background:url("assets/marble.jpg") center/cover;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.gate h1 .vt{-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.gate h1.needs-fill .vt{background:url("assets/paint-poster.webp") center/cover} /* fallback fill (68KB), requested only when the live paint can't run */
 /* SR008 interactive paint (js/paint-text.js): an aria-hidden clone of the title where only .vt is visible
-   masks the fluid canvas to those glyphs; marble stays as the no-support fallback */
+   masks the fluid canvas to those glyphs; the still poster is the no-support fallback */
 .gate h1.is-painted .vt{background:none}
 .paint-layer{position:absolute;inset:0;pointer-events:none;user-select:none;isolation:isolate;-webkit-mask-image:linear-gradient(#000 0 0);-webkit-mask-clip:text}
 .paint-layer .pl-hide{visibility:hidden}
@@ -324,7 +327,8 @@ footer{flex:none;margin-top:40px;padding:16px var(--gutter) 20px;border-top:var(
 }
 /* ===== PROTOTYPE ONLY — remove for production (see README "Prototype controls") =====
    Footer tooltip for simulating each event's state. Markup: footer .proto-fab; script: "PROTOTYPE ONLY" block. */
-footer:has(.proto-fab){display:grid;grid-template-columns:1fr auto 1fr;align-items:center} /* centres the chip; base flex footer returns when the tool is removed */
+footer:has(.proto-fab){display:grid;grid-template-columns:minmax(max-content,1fr) auto minmax(max-content,1fr);align-items:center} /* centres the chip while space allows; side labels never wrap; base flex footer returns when the tool is removed */
+footer:has(.proto-fab) > .label{white-space:nowrap}
 footer:has(.proto-fab) > .label:last-child{justify-self:end}
 .proto-fab{position:relative;z-index:120;display:flex;justify-content:center;padding:12px 20px;margin:-12px -20px} /* padding = larger hover target, margin keeps the layout */
 .proto-chip{appearance:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:12px;line-height:16px;
@@ -349,8 +353,8 @@ footer:has(.proto-fab) > .label:last-child{justify-self:end}
 .proto-modes input{position:absolute;opacity:0;width:0;height:0;margin:0}
 .proto-reset{appearance:none;cursor:pointer;font:inherit;font-size:13px;font-weight:600;padding:8px 10px;border-radius:var(--sr-radius-sm);border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--sr-bg-base)}
 .proto-reset:hover{background:rgba(255,255,255,.1)}
-@media (max-width:719px){footer:has(.proto-fab){grid-template-columns:1fr auto}footer:has(.proto-fab) .proto-fab{grid-column:1/-1;order:1;justify-content:flex-start}
-  .proto-panel{position:fixed;left:16px;right:16px;bottom:72px;width:auto;transform:translateY(4px)}
+@media (max-width:440px){footer:has(.proto-fab){grid-template-columns:1fr auto}footer:has(.proto-fab) .proto-fab{grid-column:1/-1;order:1;justify-content:flex-start}} /* only when SR.XP + chip + copyright can't share a row */
+@media (max-width:719px){.proto-panel{position:fixed;left:16px;right:16px;bottom:72px;width:auto;transform:translateY(4px)}
   .proto-fab:not(.snooze):hover .proto-panel,.proto-fab:focus-within .proto-panel,.proto-fab.open .proto-panel{transform:none}}
 /* ===== end PROTOTYPE ONLY ===== */
 /* ===== Static Grey Gloss: buttons without the glass kit (lite tier via js/fx-tier.js, or no JS) =====
@@ -458,7 +462,7 @@ const CONTENT = {
   // TEST ONLY: stands in for the sr-everyone@a16z.com alias. Replace with the real member list (server-side) before launch.
   testApprovedDomains: ["a16z.com"],
   items: [
-    { n:"FW26.1", img:"assets/la.jpg", type:"Event", title:"Los Angeles Pop-Up", city:"Los Angeles", dateLabel:"Wed Oct 14", date:"2026-10-14", doors:"15:00", end:"19:00", tz:"-07:00", time:"3–7 PM PT", status:"open", art:"prism", password:"STARTLA", approved:["demo@speedrun.com","sr-everyone@a16z.com"], perk:"Limited edition apparel, first come, first served", venue:"TBD: Venue and street address",
+    { n:"FW26.1", img:"assets/la.jpg", imgWebp:"assets/la.webp", type:"Event", title:"Los Angeles Pop-Up", city:"Los Angeles", dateLabel:"Wed Oct 14", date:"2026-10-14", doors:"15:00", end:"19:00", tz:"-07:00", time:"3–7 PM PT", status:"open", art:"prism", password:"STARTLA", approved:["demo@speedrun.com","sr-everyone@a16z.com"], perk:"Limited edition apparel, first come, first served", venue:"TBD: Venue and street address",
       desc:"One afternoon in LA while SR008 applications are open. Meet the speedrun team, grab some snacks, bring your questions, and walk away with limited edition apparel — first come, first served." },
     { n:"FW26.2", type:"Event", title:"San Francisco Pop-Up", city:"San Francisco", dateLabel:"Wed Oct 21", date:"2026-10-21", doors:"17:00", end:"21:00", tz:"-07:00", time:"5–9 PM PT", status:"open", art:"prism", password:"STARTSF", approved:["demo@speedrun.com","sr-everyone@a16z.com"], venue:"TBD: Venue and street address",
       desc:"The second stop. Same format, different city: food, drinks, and open office hours with the people who read your application." },
@@ -491,7 +495,7 @@ const CONTENT = {
     if (req && onList(it)) return '<span class="sr-tag sr-tag--info">Approved</span>';
     if (req) return '<span class="sr-tag sr-tag--warning">Requested</span>';
     return `<span class="sr-tag ${c}">${d?'<span class="dot"></span>':''}${l}</span>`; };
-  const art = (it, big) => it.img ? `<div class="art photo"><img src="${it.img}" alt="" loading="lazy"><i class="label">${esc(it.type)}</i></div>` : `<div class="art ${it.art==='prism'?'prism':it.art==='ink'?'ink':''}"><b>${it.redacted?'?':esc(it.n)}</b><i class="label">${esc(it.type)}</i></div>`;
+  const art = (it, big) => it.img ? `<div class="art photo"><picture>${it.imgWebp ? `<source srcset="${it.imgWebp}" type="image/webp">` : ''}<img src="${it.img}" alt="" loading="lazy"></picture><i class="label">${esc(it.type)}</i></div>` : `<div class="art ${it.art==='prism'?'prism':it.art==='ink'?'ink':''}"><b>${it.redacted?'?':esc(it.n)}</b><i class="label">${esc(it.type)}</i></div>`;
 
   /* ---- gate ---- */
   const root = document.documentElement, gate = $("#gate");
