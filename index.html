@@ -324,9 +324,9 @@ footer:has(.proto-fab){display:grid;grid-template-columns:1fr auto 1fr;align-ite
 footer:has(.proto-fab) > .label:last-child{justify-self:end}
 .proto-fab{position:relative;z-index:120;display:flex;justify-content:center;padding:12px 20px;margin:-12px -20px} /* padding = larger hover target, margin keeps the layout */
 .proto-chip{appearance:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:12px;line-height:16px;
-  padding:6px 12px;border:0;border-radius:var(--sr-radius-pill);color:var(--sr-bg-base);background:var(--sr-text-primary)}
+  padding:6px 12px;border:0;border-radius:4px;color:var(--sr-bg-base);background:var(--sr-text-primary)} /* 4px corners, same as .sr-tag */
 .proto-chip:hover{opacity:.85}
-.proto-panel{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,4px);width:min(380px,calc(100vw - 32px));padding:16px;display:flex;flex-direction:column;gap:12px;text-align:left;
+.proto-panel{position:absolute;left:50%;bottom:calc(100% - 2px);transform:translate(-50%,4px);width:min(380px,calc(100vw - 32px));padding:16px;display:flex;flex-direction:column;gap:12px;text-align:left;
   background:var(--sr-text-primary);color:var(--sr-bg-base);border-radius:var(--sr-radius-md);box-shadow:var(--sr-shadow-sheet);
   opacity:0;visibility:hidden;transition:opacity .15s,transform .15s var(--ease),visibility 0s linear .15s}
 /* tooltip: opens on hover or keyboard focus; a tap toggles .open on touch */
@@ -602,6 +602,8 @@ const CONTENT = {
   if (proto) {
     const MODES = [["open","Open"],["requested","Requested"],["approved","Approved"],["unlocked","Unlocked"]];
     const modeOf = i => isUnlocked(i) ? "unlocked" : store.get("req:"+i.n) ? (onList(i) ? "approved" : "requested") : "open";
+    // Build the rows once; syncProto only flips which radio is checked, so no element is ever
+    // replaced under the pointer mid-click (a rebuild on hover used to swallow clicks).
     const drawProto = () => {
       $("#proto-events").innerHTML = items.filter(i => i.password).map(i => `<div class="proto-row">
         <b>${esc(i.city)}</b><code>${esc(i.password)}</code>
@@ -609,22 +611,24 @@ const CONTENT = {
           `<label><input type="radio" name="proto-${esc(i.n)}" value="${v}" data-n="${esc(i.n)}" ${modeOf(i)===v ? "checked" : ""}>${l}</label>`).join("")}</div>
       </div>`).join("");
     };
+    const syncProto = () => items.filter(i => i.password).forEach(i => { const m = modeOf(i); proto.querySelectorAll(`input[data-n="${i.n}"]`).forEach(r => { r.checked = r.value === m; }); });
     $("#proto-events").addEventListener("change", ev => {
       const r = ev.target.closest('input[type="radio"][data-n]'); if (!r) return;
       const n = r.dataset.n, v = r.value, set = (k, on) => on ? store.set(k+n, true) : store.del(k+n);
       set("req:", v !== "open"); set("approve:", v === "approved" || v === "unlocked"); set("un:", v === "unlocked"); set("deny:", v === "requested");
-      refresh(); drawProto();
+      refresh(); syncProto();
     });
     $("#proto-reset").addEventListener("click", () => {
       items.forEach(i => ["req:","un:","approve:","deny:"].forEach(k => store.del(k+i.n)));
-      $("#mail").hidden = true; refresh(); drawProto();
+      $("#mail").hidden = true; refresh(); syncProto();
     });
     // hover/focus open it via CSS; a tap toggles it on touch screens
     // hover opens; click pins it open. Closing by click also snoozes hover until the pointer leaves, so it doesn't pop straight back.
     $("#proto-chip").addEventListener("click", () => { const open = !proto.classList.contains("open"); proto.classList.toggle("open", open); proto.classList.toggle("snooze", !open); $("#proto-chip").setAttribute("aria-expanded", String(open)); });
     proto.addEventListener("mouseleave", () => proto.classList.remove("snooze"));
-    document.addEventListener("click", ev => { if (!proto.contains(ev.target)) { proto.classList.remove("open"); $("#proto-chip").setAttribute("aria-expanded", "false"); } });
-    proto.addEventListener("mouseenter", drawProto);
+    // composedPath: picking an option re-renders the panel mid-click, so ev.target may already be detached
+    document.addEventListener("click", ev => { if (!ev.composedPath().includes(proto)) { proto.classList.remove("open"); $("#proto-chip").setAttribute("aria-expanded", "false"); } });
+    proto.addEventListener("mouseenter", syncProto); // pick up states changed via the real flow while closed
     drawProto();
   }
   /* ===== end PROTOTYPE ONLY ===== */
