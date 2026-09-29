@@ -3,8 +3,9 @@
    glass clip, under the label, so the ripple and silver gloss edge stay and only
    the fill moves. The texture (assets/apply-paint.png) is read at its natural
    size; the button shows its middle (12% inset on every side), and the margins
-   are headroom so the warp never runs out of paint. Swap the file freely. Hovering sweeps a brush across the fill from the entry side, and
-   moving the pointer stirs it. Off in the lite tier (CSS shows the still fill). */
+   are headroom so the warp never runs out of paint. Swap the file freely. Only
+   the pointer moving over the button stirs the paint — no automatic motion on
+   hover. Off in the lite tier (CSS shows the still fill). */
 (() => {
   const FH = window.FluidHeader, tier = window.srxpFx;
   if (!FH || (tier && tier.lite)) return;
@@ -55,33 +56,15 @@
       Object.defineProperty(e, 'getCoalescedEvents', {value: undefined}); // synthetic events have none
       paint.dispatchEvent(e);
     };
-    let sweep = 0;
-    const SWEEP_ID = 9001; // its own pointer id, so the automatic sweep and the real pointer stir independently
-    const onEnter = ev => {
-      if (ev.pointerType === 'touch') return;
-      cancelAnimationFrame(sweep);
-      const b = paint.getBoundingClientRect(), fromLeft = ev.clientX < b.left + b.width / 2;
-      const x0 = fromLeft ? b.left + 2 : b.right - 2, x1 = fromLeft ? b.right - 2 : b.left + 2, y = b.top + b.height / 2;
-      const fake = (x, yy) => ({clientX: x, clientY: yy, pointerId: SWEEP_ID, pointerType: 'mouse'});
-      const t0 = performance.now(), dur = 420;
-      relay('pointermove', fake(x0, y)); // registers the sweep pointer
-      const step = now => {
-        const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
-        relay('pointermove', fake(x0 + (x1 - x0) * e, y + Math.sin(t * Math.PI) * b.height * 0.2));
-        if (t < 1) sweep = requestAnimationFrame(step); else relay('pointerleave', fake(x1, y));
-      };
-      sweep = requestAnimationFrame(step);
-    };
     const onMove = ev => relay('pointermove', ev);
     const onLeave = ev => relay('pointerleave', ev);
-    el.addEventListener('pointerenter', onEnter);
     el.addEventListener('pointermove', onMove, {passive: true});
     el.addEventListener('pointerleave', onLeave);
     const ro = new ResizeObserver(() => { if (fx.set) fx.set({sourceRect: sourceRect(paint)}); });
     ro.observe(paint);
     live.set(el, () => {
-      cancelAnimationFrame(sweep); ro.disconnect();
-      el.removeEventListener('pointerenter', onEnter); el.removeEventListener('pointermove', onMove); el.removeEventListener('pointerleave', onLeave);
+      ro.disconnect();
+      el.removeEventListener('pointermove', onMove); el.removeEventListener('pointerleave', onLeave);
       fx.destroy(); paint.remove();
     });
   }
