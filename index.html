@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>sr.xp — speedrun</title>
+<link rel="stylesheet" href="vendor/glass/glass-effects.css">
+<script src="js/fx-tier.js"></script>
+<link rel="preload" href="assets/paint-source.avif" as="image" type="image/avif">
+<style>
+@font-face{font-family:"Messina Sans";src:url("fonts/MessinaSans-VF-Upright.ttf") format("truetype");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Messina Sans";src:url("fonts/MessinaSans-VF-Italic.ttf") format("truetype");font-weight:100 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Messina Sans Black";src:url("fonts/MessinaSans-Black.otf") format("opentype");font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:"Messina Sans Condensed";src:url("fonts/MessinaSans-CondensedRegular.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap}
+</style>
+<style>
+:root{
+  --sr-bg-base:#F3F3F3; --sr-bg-surface:#FFFFFF; --sr-bg-sunk:#E1DED8;
+  --sr-bg-hud:rgba(216,212,204,.56); --sr-bg-hud-hover:rgba(216,212,204,.66); --sr-bg-hud-open:rgba(216,212,204,.72);
+  --sr-text-primary:#1A1A1A; --sr-text-secondary:rgba(26,26,26,.62); --sr-text-tertiary:rgba(26,26,26,.46); --sr-text-disabled:rgba(26,26,26,.28);
+  --sr-text-inverse:#FFFFFF;
+  --sr-stroke-hairline:1px solid rgba(0,0,0,.08); --sr-stroke-soft:1px solid rgba(0,0,0,.12); --sr-stroke-strong:1px solid rgba(0,0,0,.22); --sr-stroke-secondary:1px solid rgba(0,0,0,.30);
+  --sr-stroke-ink:1px solid #1A1A1A;
+  --sr-wash-subtle:rgba(0,0,0,.04); --sr-wash-soft:rgba(0,0,0,.06);
+  --sr-prism-purple:#A162FF; --sr-prism-violet:#8F4EFE; --sr-prism-aqua-lit:#56FAF7; --sr-prism-aqua-deep:#00A1DA; --sr-prism-cream:#F8DCBB;
+  --sr-success:#89FC72; --sr-warning:#FDCC62; --sr-info:#C6D5FD; --sr-error:#FCC8B9;
+  --sr-gradient-prism-primary:linear-gradient(90deg,var(--sr-prism-purple) 0%,var(--sr-prism-aqua-lit) 50%,var(--sr-prism-cream) 100%);
+  --sr-gradient-prism-text:linear-gradient(90deg,var(--sr-prism-violet) 0%,var(--sr-prism-aqua-deep) 100%);
+  --sr-radius-xs:6px; --sr-radius-sm:8px; --sr-radius-md:12px; --sr-radius-lg:16px; --sr-radius-xl:24px; --sr-radius-pill:9999px;
+  --sr-shadow-hud:0 8px 32px rgba(0,0,0,.12); --sr-shadow-sheet:0 24px 80px rgba(0,0,0,.18);
+  --font:"Messina Sans",ui-sans-serif,system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --font-black:"Messina Sans Black","Messina Sans",ui-sans-serif,system-ui,sans-serif;
+  --font-cond:"Messina Sans Condensed","Messina Sans",ui-sans-serif,system-ui,sans-serif;
+  --gutter:32px; /* uniform page edge margin at every breakpoint (--sr-space-8) */
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--sr-bg-base);color:var(--sr-text-primary)}
+body{font-family:var(--font);font-weight:500;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+::selection{background:var(--sr-text-primary);color:var(--sr-bg-base)}
+a{color:inherit}
+a:hover{opacity:.6}
+button{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{font-family:var(--font-black);font-weight:900;letter-spacing:-.05em;line-height:1;text-wrap:balance}
+p{text-wrap:pretty}
+:focus-visible{outline:2px solid var(--sr-prism-violet);outline-offset:2px}
+.label,.c{font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:13px;line-height:16px}
+.muted{color:var(--sr-text-secondary)}
+.logo{height:16px;width:auto;display:block}
+.logo path{fill:currentColor}
+
+/* buttons / tags */
+.sr-btn{appearance:none;border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-family:var(--font);font-weight:500;text-transform:none;letter-spacing:-.015em;font-size:19px;line-height:20px;padding:16px 32px;min-height:56px;border-radius:var(--sr-radius-xs);transition:background .2s,color .2s,border-color .2s}
+.sr-btn:hover{opacity:1}
+/* chrome glass (per speedrun site reference) */
+.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud{position:relative}
+:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud):not(.sr-glass-kit-button),:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud) .sr-btn-finish{color:var(--sr-text-primary);border:1px solid transparent;border-radius:var(--sr-radius-xs);
+  background:linear-gradient(180deg,#F5F5F5 0%,#EDEDED 100%) padding-box,linear-gradient(160deg,#FFFFFF 0%,#C9C9C9 30%,#FFFFFF 52%,#9B9B9B 78%,#6E6E6E 100%) border-box;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 4px rgba(0,0,0,.035),0 1px 1px rgba(0,0,0,.10),0 3px 6px -1px rgba(0,0,0,.14);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:box-shadow .25s var(--ease),background .25s,transform .2s var(--ease)}
+.sr-btn:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud):not(.sr-glass-kit-button):hover,.sr-glass-kit-button:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud):hover .sr-btn-finish{background:linear-gradient(180deg,#FAFAFA 0%,#F1F1F1 100%) padding-box,linear-gradient(160deg,#FFFFFF 0%,#BDBDBD 30%,#FFFFFF 52%,#8E8E8E 78%,#5E5E5E 100%) border-box;box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(0,0,0,.03),0 1px 1px rgba(0,0,0,.10),0 6px 14px -2px rgba(0,0,0,.18)}
+.sr-btn:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud):not(.sr-glass-kit-button):active{transform:translateY(1px);box-shadow:inset 0 1px 2px rgba(0,0,0,.08),0 1px 1px rgba(0,0,0,.10)}
+.sr-btn-hud .sr-prism-material{display:none}
+/* refractive glass (SR website kit, js/glass-buttons.js): finish lives inside .sr-button-clip so the ripple bends it */
+.sr-btn{--glass-button-padding:16px 32px;--glass-button-height:56px;--glass-button-radius:var(--sr-radius-xs)}
+.sr-btn.sr-glass-kit-button{padding:0}
+.sr-btn.sr-glass-kit-button :is(.sr-button-visual,.sr-button-clip,.sr-button-content){gap:8px}
+.sr-btn.sr-glass-kit-button .sr-button-content::before,.sr-btn.sr-glass-kit-button .sr-button-clip::after{display:none}
+.sr-btn-finish{position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;border:1px solid transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.sr-btn-finish,.sr-glass-kit-button:hover .sr-btn-finish{box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 4px rgba(0,0,0,.035)}
+.sr-glass-kit-button:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud,.sr-btn-apply) > .sr-button-visual{border-radius:inherit;box-shadow:0 1px 1px rgba(0,0,0,.10),0 3px 6px -1px rgba(0,0,0,.14)}
+.sr-glass-kit-button:active .sr-btn-finish{box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
+.sr-btn.sr-glass-kit-button:focus-visible{outline:2px solid var(--sr-prism-violet);outline-offset:2px}
+/* Grey Gloss (SR website button comparison 02): layers inside .sr-button-clip; the edge light travels round the stroke on entry */
+.sr-btn-gloss.sr-glass-kit-button::before{opacity:1;backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)}
+.sr-btn-gloss.sr-glass-kit-button > .sr-button-visual{box-shadow:none}
+.sr-btn-gloss .sr-button-clip{box-shadow:0 3.875px 1.9375px -1.9375px rgba(0,0,0,.2),
+  0 calc(8px * var(--sr-hover-elevation,0)) calc(7px * var(--sr-hover-elevation,0)) calc(var(--sr-shadow-center-spread,4px) * var(--sr-hover-elevation,0)) rgb(255 255 255 / calc(var(--sr-shadow-center-opacity,.288) * var(--sr-hover-elevation,0))),
+  0 calc(8px * var(--sr-hover-elevation,0)) calc(20px * var(--sr-hover-elevation,0)) calc(var(--sr-shadow-spread,8px) * var(--sr-hover-elevation,0)) rgb(0 0 0 / calc(var(--sr-shadow-opacity,.16) * var(--sr-hover-elevation,0)))}
+.sr-gloss{position:absolute;inset:0;border-radius:inherit;pointer-events:none}
+.sr-gloss-body{background:linear-gradient(-75deg,rgba(255,255,255,.05),rgba(255,255,255,.2),rgba(255,255,255,.05)),rgba(0,0,0,.065);box-shadow:inset 0 1.9375px 1.9375px rgba(0,0,0,.05),inset 0 -1.9375px 1.9375px rgba(255,255,255,.5),inset 0 0 1.55px 3.875px rgba(255,255,255,.2)}
+.sr-gloss-reflection{background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.16) 42%,rgba(255,255,255,.68) 49%,rgba(255,255,255,.68) 51%,rgba(255,255,255,.16) 58%,transparent 65%);mix-blend-mode:screen;opacity:0}
+.sr-gloss-edge{z-index:3;border:1px solid rgba(0,0,0,.2)}
+.sr-gloss-edge-light{display:none}
+@supports ((mask-composite:exclude) or (-webkit-mask-composite:xor)){
+  .sr-gloss-edge{padding:1px;border:0;background:rgba(255,255,255,.5);overflow:hidden;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+  .sr-gloss-edge-light{display:block;position:absolute;left:-50%;top:50%;width:200%;aspect-ratio:1;background:conic-gradient(from -75deg,rgba(0,0,0,.5),transparent 5% 40%,rgba(0,0,0,.5) 50%,transparent 60% 95%,rgba(0,0,0,.5));transform:translateY(-50%)}
+  .sr-btn-apply .sr-gloss-edge{background:var(--sr-gradient-prism-primary)}
+}
+/* Dark gloss (buttons on dark surfaces, e.g. Add to Calendar in the Unlocked card): light label,
+   light tint and edge, light sweep travelling round the stroke; ripple uses SR "03 Flat Black" tuning */
+.sr-btn-gloss--dark{color:var(--sr-bg-base)}
+.sr-btn-gloss--dark .sr-gloss-body{background:linear-gradient(-75deg,rgba(255,255,255,.04),rgba(255,255,255,.14),rgba(255,255,255,.04)),rgba(255,255,255,.08);box-shadow:inset 0 1.9375px 1.9375px rgba(255,255,255,.12),inset 0 -1.9375px 1.9375px rgba(0,0,0,.35),inset 0 0 1.55px 3.875px rgba(255,255,255,.06)}
+.sr-btn-gloss--dark .sr-gloss-reflection{background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.08) 42%,rgba(255,255,255,.4) 49%,rgba(255,255,255,.4) 51%,rgba(255,255,255,.08) 58%,transparent 65%)}
+.sr-btn-gloss--dark .sr-gloss-edge{border-color:rgba(255,255,255,.28)}
+@supports ((mask-composite:exclude) or (-webkit-mask-composite:xor)){
+  .sr-btn-gloss--dark .sr-gloss-edge{background:rgba(255,255,255,.22)}
+  .sr-btn-gloss--dark .sr-gloss-edge-light{background:conic-gradient(from -75deg,rgba(255,255,255,.85),transparent 5% 40%,rgba(255,255,255,.85) 50%,transparent 60% 95%,rgba(255,255,255,.85))}
+}
+.sr-btn-gloss--dark .sr-button-clip{box-shadow:0 3.875px 1.9375px -1.9375px rgba(0,0,0,.5),
+  0 calc(8px * var(--sr-hover-elevation,0)) calc(20px * var(--sr-hover-elevation,0)) calc(var(--sr-shadow-spread,8px) * var(--sr-hover-elevation,0)) rgb(0 0 0 / calc(.4 * var(--sr-hover-elevation,0)))}
+.sr-btn-hud .t{position:relative}
+.sr-btn--md{min-height:36px;font-size:15px;padding:8px 14px;--glass-button-padding:8px 14px;--glass-button-height:36px}
+.sr-btn[disabled]{opacity:.45;cursor:not-allowed}
+@keyframes prism{50%{background-position:100% 0}}
+.sr-tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:12px;line-height:16px;padding:2px 8px;border-radius:4px;background:var(--sr-wash-soft);white-space:nowrap}
+.sr-tag--success{background:var(--sr-success)}
+.sr-tag--warning{background:var(--sr-warning)}
+.sr-tag--info{background:var(--sr-info)}
+.sr-tag--ink{background:var(--sr-text-primary);color:var(--sr-text-inverse)}
+.sr-tag--unlocked{background:var(--sr-text-primary);color:var(--sr-success)}
+.sr-tag--tbd{background:transparent;border:1px dashed rgba(0,0,0,.4)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.sr-tag--success .dot{animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.2}}
+.sr-input{width:100%;font:inherit;font-weight:600;font-size:17px;line-height:20px;letter-spacing:-.01em;color:var(--sr-text-primary);background:var(--sr-bg-hud);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:var(--sr-stroke-soft);border-radius:var(--sr-radius-sm);padding:12px 16px;min-height:56px;transition:background .2s,border-color .2s}
+.sr-input:hover{background:var(--sr-bg-hud-hover)}
+.sr-input:focus{background:var(--sr-bg-hud-open);border-color:rgba(0,0,0,.5);outline:none}
+.sr-input::placeholder{color:var(--sr-text-disabled)}
+.sr-input[aria-invalid="true"]{border-color:#E0633F}
+.err{font-size:13px;font-weight:600;color:#B23A17}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* ================= LANDING (gate) ================= */
+html.gated body{overflow:hidden}
+.gate{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;padding:var(--gutter);background:var(--sr-bg-base);overflow:auto;transition:opacity .5s var(--ease),visibility .5s}
+.gate[hidden]{display:flex;opacity:0;visibility:hidden;pointer-events:none}
+.gate-top,.gate-bot{flex:none;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.gate-top .logo{height:23px}
+/* left-anchored composition: title column + fixed gap + login block (no screen-wide span) */
+.gate-main{--gate-gap:clamp(56px,8vw,144px);--gate-form:400px;flex:1;display:flex;align-items:flex-end;justify-content:flex-start;column-gap:var(--gate-gap);row-gap:40px;padding-block:32px}
+/* five fixed lines, sized to the largest that fits: widest line "and Drops," = 4.70em, stack = 4.62em tall.
+   Height budget = viewport − gutters − top bar (23) − bottom bar (33) − main padding (64). */
+/* Composition A (≥1200px): 5 lines beside the form. B (720–1199): 3 lines, form below. C (<720): 5 lines, form below. */
+.gate h1 .bB,.gate h1 .bC,.gate h1 .bD{display:none}
+.gate h1{position:relative;flex:none;white-space:nowrap;line-height:.9;letter-spacing:-.06em;margin-left:-.04em;
+  font-size:min(calc((100svh - 2 * var(--gutter) - 120px) / 4.62),calc((100vw - 2 * var(--gutter) - var(--gate-gap) - var(--gate-form)) / 4.76))}
+.gate h1 .vt{background:url("assets/marble.jpg") center/cover;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* SR008 interactive paint (js/paint-text.js): an aria-hidden clone of the title where only .vt is visible
+   masks the fluid canvas to those glyphs; marble stays as the no-support fallback */
+.gate h1.is-painted .vt{background:none}
+.paint-layer{position:absolute;inset:0;pointer-events:none;user-select:none;isolation:isolate;-webkit-mask-image:linear-gradient(#000 0 0);-webkit-mask-clip:text}
+.paint-layer .pl-hide{visibility:hidden}
+.paint-layer .paint{position:absolute;inset:-.12em -.06em;z-index:-1;border-radius:0;aspect-ratio:auto!important} /* runtime sets an inline aspect-ratio that would override the insets */
+.gate-form{flex:none;width:min(var(--gate-form),100%);display:flex;flex-direction:column;gap:16px;padding-bottom:.4em} /* same width at every breakpoint */
+.gate-form p.lede{font-size:18px;font-weight:600;color:var(--sr-text-primary);max-width:36ch}
+.gate-row{display:flex;flex-direction:column;gap:8px}
+.gate-fine{font-size:13px;color:var(--sr-text-tertiary)}
+/* sign-in footer = Index footer: sr.xp + copyright, full-bleed divider (breaks out of the gate padding), 20px to the bottom edge */
+.gate-bot{margin:0 calc(-1 * var(--gutter)) calc(-1 * var(--gutter));padding:16px var(--gutter) 20px;border-top:var(--sr-stroke-soft);flex-wrap:wrap;row-gap:8px}
+.gate.leaving .gate-main{opacity:0;transition:opacity .3s}
+@media (max-width:1199px){
+  /* B: title anchored to the top; spare height falls between the form and the footer */
+  .gate-main{flex-direction:column;align-items:flex-start;justify-content:flex-start}
+  .gate h1 .bA{display:none}.gate h1 .bB{display:inline}
+  /* widest B line "Exclusive Events" = 7.31em; 3 lines = 2.78em tall, leaving room for the form (≈330px) below */
+  .gate h1{font-size:max(56px,min(calc((100vw - 2 * var(--gutter)) / 7.4),calc((100svh - 2 * var(--gutter) - 453px) / 2.78)))}
+}
+@media (max-width:719px){
+  .gate-main{justify-content:flex-end}
+  .gate h1 .bB{display:none}.gate h1 .bC{display:inline}
+  /* widest C line "Events and" = 4.85em; 65% of full width so the login block stays in view, never below 78px */
+  .gate h1{font-size:max(78px,calc((100vw - 2 * var(--gutter)) / 4.95 * .65))}
+}
+@media (max-width:449px){
+  /* D: C plus a break after "Events" so 78px still fits; widest line "Drops, As" = 4.18em.
+     Only shrinks below 78px when one line can't fit (≈ <396px wide). */
+  .gate h1 .bD{display:inline}
+  .gate h1{font-size:min(78px,calc((100vw - 2 * var(--gutter)) / 4.25))}
+}
+
+/* ================= INSIDE ================= */
+.bar{position:sticky;top:0;z-index:100}
+.bar-inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:12px var(--gutter)}
+.bar-l{display:flex;align-items:center;gap:12px;text-decoration:none}
+.bar-l .xp{padding-left:12px;border-left:var(--sr-stroke-strong)}
+.bar-c{display:flex;gap:20px}
+.bar-r{display:flex;justify-content:flex-end;align-items:center;gap:16px}
+.clock{font-variant-numeric:tabular-nums}
+.who{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--sr-text-secondary)}
+.linkbtn{background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:hover{opacity:.6}
+/* inverted top bar: ink background, #F3F3F3 logo + text */
+.bar{background:var(--sr-text-primary);color:var(--sr-bg-base);--glass-quote-background:var(--sr-text-primary);--glass-quote-padding:12px var(--gutter)}
+.bar-inner{cursor:pointer} /* click anywhere: dark shimmer ripple (js/bar-ripple.js) */
+.bar-l .xp{border-left-color:rgba(243,243,243,.3)}
+.bar .who{color:rgba(243,243,243,.62)}
+.bar ::selection{background:var(--sr-bg-base);color:var(--sr-text-primary)}
+.bar a:hover,.bar .linkbtn:hover{opacity:1} /* no hover dimming in the top bar; the ripple is the hover feedback */
+
+.masthead{padding:clamp(40px,7vw,96px) var(--gutter) 24px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;align-items:last baseline;border-bottom:var(--sr-stroke-ink)} /* intro's last line sits on the Index baseline */
+.masthead h1{font-size:clamp(96px,13vw,220px); /* never below 96px above the mobile break */line-height:.82;letter-spacing:-.07em;margin-left:-.05em}
+.masthead h1 sup{font-size:.18em;letter-spacing:0;vertical-align:top;position:relative;top:.5em;margin-left:.1em;font-family:var(--font-cond);font-weight:400;font-weight:400}
+.masthead-side{display:flex;flex-direction:column;gap:12px;max-width:300px}
+.masthead-side p{font-weight:600}
+
+.tools{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:12px var(--gutter);border-bottom:var(--sr-stroke-soft);position:sticky;top:57px;z-index:90;background:var(--sr-bg-base)}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{appearance:none;border:var(--sr-stroke-soft);background:transparent;cursor:pointer;padding:6px 10px;border-radius:var(--sr-radius-xs);font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:13px;line-height:16px;transition:background .15s,color .15s}
+.seg button:hover{background:var(--sr-wash-soft)}
+.seg button[aria-pressed="true"]{background:var(--sr-text-primary);color:var(--sr-text-inverse);border-color:var(--sr-text-primary)}
+.seg sup{font-size:inherit;line-height:inherit;vertical-align:baseline;margin-left:4px;opacity:.55} /* count sits on the label's baseline so pills stay even */
+
+/* list view */
+.idx{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:72px minmax(0,2.4fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) 128px;gap:16px;align-items:baseline;padding:0 var(--gutter)}
+/* event ticker (built from CONTENT.items in render): scrolls left → right, repeats seamlessly */
+.ticker{overflow:hidden;white-space:nowrap;padding-block:10px;border-bottom:var(--sr-stroke-soft);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(90deg,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
+.ticker-track{display:inline-flex;will-change:transform;animation:ticker-ltr var(--ticker-dur,40s) linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker-item{display:inline-flex;align-items:center;gap:12px;padding-right:12px;font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:13px;line-height:16px;color:var(--sr-text-primary)}
+.ticker-item i{font-style:normal;color:var(--sr-text-tertiary)}
+.ticker-item b{font-weight:400;width:6px;height:6px;background:var(--sr-text-primary);transform:rotate(45deg);margin-inline:12px}
+@keyframes ticker-ltr{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.row{position:relative;padding-block:18px;border-bottom:var(--sr-stroke-soft);cursor:pointer;transition:background .15s}
+.row:hover,.row:focus-visible{background:var(--sr-bg-surface)}
+.row:focus-visible{outline-offset:-2px}
+.row .n{font-size:15px;font-variant-numeric:tabular-nums}
+.row .t{font-size:clamp(22px,2.6vw,36px);font-family:var(--font-black);font-weight:900;letter-spacing:-.045em;line-height:1}
+.row .st{justify-self:end}
+.row.redacted .t span{background:var(--sr-text-primary);color:transparent;border-radius:2px;user-select:none}
+.row.is-hidden,.tile.is-hidden{display:none}
+
+/* grid view */
+.grid{display:none;grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); /* auto-fit: once all tiles share a row they widen to fill 100% */border-left:var(--sr-stroke-soft)}
+.view-grid .grid{display:grid}
+.view-grid .idx{display:none}
+.tile{appearance:none;text-align:left;background:transparent;border:0;border-right:var(--sr-stroke-soft);border-bottom:var(--sr-stroke-soft);padding:16px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:background .15s}
+.tile:hover{background:var(--sr-bg-surface)}
+.tile-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.art{position:relative;aspect-ratio:4/5;border-radius:var(--sr-radius-xs);overflow:hidden;display:grid;place-items:center;background:var(--sr-bg-sunk)}
+.art b{font-size:clamp(64px,8vw,104px);font-family:var(--font-black);font-weight:900;letter-spacing:-.07em;line-height:.8;color:transparent;-webkit-text-stroke:1.5px rgba(26,26,26,.5)}
+.art i{position:absolute;left:10px;bottom:10px;font-style:normal}
+.art.prism{background:linear-gradient(160deg,rgba(161,98,255,.55),rgba(86,250,247,.45) 55%,rgba(248,220,187,.8))}
+.art.prism b{-webkit-text-stroke-color:rgba(26,26,26,.7)}
+.art.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% 60%}
+.art.photo::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.45))}
+.art.photo i{z-index:1;color:var(--sr-text-inverse)}
+.art.ink{background:var(--sr-text-primary)}
+.art.ink b{-webkit-text-stroke-color:rgba(255,255,255,.5)}
+.art.ink i{color:var(--sr-text-inverse)}
+.tile h3{font-size:24px;letter-spacing:-.04em}
+.tile .meta{display:flex;justify-content:space-between;gap:8px;color:var(--sr-text-secondary)}
+
+/* hover preview (follows cursor) */
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:150;background:rgba(26,26,26,.28);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+.scrim.on{opacity:1;visibility:visible}
+.sheet{position:fixed;top:0;right:0;bottom:0;z-index:160;width:min(560px,100vw);background:var(--sr-bg-surface);box-shadow:var(--sr-shadow-sheet);transform:translateX(100%);visibility:hidden;transition:transform .45s var(--ease),visibility 0s linear .45s;display:flex;flex-direction:column;overflow:auto}
+.sheet.on{transform:none;visibility:visible;transition:transform .45s var(--ease),visibility 0s}
+.sheet-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--sr-bg-surface);border-bottom:var(--sr-stroke-hairline)}
+.sheet-body{padding:24px;display:flex;flex-direction:column;gap:24px}
+.sheet .art{aspect-ratio:16/10}
+.sheet h2{font-size:clamp(40px,6vw,64px);letter-spacing:-.06em}
+.sheet .desc{font-size:17px;font-weight:600;color:var(--sr-text-secondary)}
+.kv{display:grid;grid-template-columns:120px 1fr;border-top:var(--sr-stroke-soft)}
+.kv > *{padding-block:12px;border-bottom:var(--sr-stroke-soft)}
+.kv dt{color:var(--sr-text-tertiary)}
+.kv dd{margin:0;font-weight:700;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.includes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.includes li{display:grid;grid-template-columns:56px 1fr;gap:12px;padding-block:12px;border-bottom:var(--sr-stroke-hairline)}
+.includes b{font-weight:900;font-size:18px;letter-spacing:-.03em}
+.box{padding:24px;border:var(--sr-stroke-hairline);border-radius:var(--sr-radius-lg);display:flex;flex-direction:column;gap:16px;background:var(--sr-bg-surface);box-shadow:0 1px 2px rgba(0,0,0,.04),0 12px 32px -16px rgba(0,0,0,.12)}
+.box-head{display:flex;flex-direction:column;gap:6px}
+.box-head p{font-size:15px;font-weight:500;color:var(--sr-text-secondary)}
+.cta-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cta-pair.one{grid-template-columns:1fr}
+.cta-pair .sr-btn{min-height:48px;font-size:16px;padding:12px 16px;--glass-button-padding:12px 16px;--glass-button-height:48px}
+.pw-inline{position:relative;display:flex}
+.pw-inline .sr-input{min-height:48px;font-size:15px;padding-right:96px;background:var(--sr-bg-base);border:var(--sr-stroke-hairline)}
+.pw-inline .sr-btn{position:absolute;top:6px;right:6px;bottom:6px;min-height:0;--glass-button-height:0px}
+.mail{position:fixed;left:16px;bottom:16px;z-index:300;width:min(360px,calc(100vw - 32px));padding:16px;display:flex;flex-direction:column;gap:6px;background:var(--sr-bg-hud-open);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:var(--sr-stroke-secondary);border-radius:var(--sr-radius-lg);box-shadow:var(--sr-shadow-sheet);opacity:0;transform:translateY(8px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.mail.on{opacity:1;transform:none}
+.mail-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mail b{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.mail code{align-self:flex-start;font-family:ui-monospace,Menlo,monospace;font-size:18px;letter-spacing:.12em;padding:6px 10px;border-radius:var(--sr-radius-xs);background:var(--sr-bg-surface);border:var(--sr-stroke-soft)}
+@media (max-width:480px){.cta-pair{grid-template-columns:1fr}}
+.box.ok{background:var(--sr-text-primary);color:var(--sr-text-inverse);border-color:var(--sr-text-primary)}
+.box.ok .muted{color:rgba(255,255,255,.7)}
+/* venue + ID note: one size/weight, tight leading between them */
+.box.ok > .label{color:var(--sr-success)} /* "Unlocked · You're Approved" in the same neon green as Open tags */
+.ok-info{display:flex;flex-direction:column;gap:4px}
+.ok-info + .sr-btn{margin-top:4px} /* optically matches the eyebrow→venue gap (text leading vs. button edge) */
+.ok-info p{font-size:18px;font-weight:700;line-height:24px;letter-spacing:-.01em;color:var(--sr-text-inverse)}
+/* TBD reads as part of the venue line here, not as a tag */
+.ok-info .sr-tag--tbd{font:inherit;letter-spacing:inherit;text-transform:none;padding:0;border:0;border-radius:0;background:none;color:inherit;display:inline}
+.sr-btn-apply{color:var(--sr-text-primary)}
+.sr-btn-apply:not(.sr-glass-kit-button),.sr-btn-apply .sr-btn-finish{border:1px solid transparent;border-radius:var(--sr-radius-xs);background:linear-gradient(180deg,#F7F7F7,#EDEDED) padding-box,linear-gradient(90deg,var(--sr-prism-purple),var(--sr-prism-aqua-lit),var(--sr-prism-cream)) border-box;box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(0,0,0,.08),0 8px 24px -6px rgba(143,78,254,.45);transition:box-shadow .25s,transform .2s}
+.sr-btn-apply:hover{opacity:1}
+.sr-btn-apply:not(.sr-glass-kit-button):hover,.sr-glass-kit-button.sr-btn-apply:hover .sr-btn-finish{box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(0,0,0,.08),0 12px 32px -6px rgba(86,250,247,.6)}
+.sr-btn-apply:not(.sr-glass-kit-button):active{transform:translateY(1px)}
+.sr-glass-kit-button.sr-btn-apply > .sr-button-visual{box-shadow:0 1px 1px rgba(0,0,0,.08),0 8px 24px -6px rgba(143,78,254,.45);transition:box-shadow .25s}
+.sr-glass-kit-button.sr-btn-apply:hover > .sr-button-visual{box-shadow:0 1px 1px rgba(0,0,0,.08),0 12px 32px -6px rgba(86,250,247,.6)}
+
+/* sticky footer: on short pages the footer sits at the bottom of the window */
+body{display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
+body > main{flex:1 0 auto}
+/* Index footer: sr.xp + copyright; full-bleed divider, text on the page margins, 20px to the bottom edge */
+footer{flex:none;margin-top:40px;padding:16px var(--gutter) 20px;border-top:var(--sr-stroke-soft);display:flex;justify-content:space-between;align-items:center;gap:16px;row-gap:8px;flex-wrap:wrap;color:var(--sr-text-primary)}
+
+
+/* masthead: intro stays beside "Index" until mobile; on mobile it stacks and fills the margins */
+@media (max-width:719px){
+  .masthead{grid-template-columns:1fr;align-items:start}
+  .masthead-side{max-width:none;padding-bottom:.6em}
+  .masthead h1{font-size:clamp(64px,13vw,220px)} /* mobile keeps its original scaling */
+}
+@media (max-width:900px){
+  .bar-inner{grid-template-columns:1fr auto}.bar-c{display:none}
+  .row{grid-template-columns:48px minmax(0,1fr) auto;row-gap:6px}
+  .row .ty,.row .ci{display:none}
+  .row .dt{grid-column:2;grid-row:2;color:var(--sr-text-secondary)}
+  .row .st{grid-column:3;grid-row:1}
+  .who{display:none}
+}
+/* ===== PROTOTYPE ONLY — remove for production (see README "Prototype controls") =====
+   Footer tooltip for simulating each event's state. Markup: footer .proto-fab; script: "PROTOTYPE ONLY" block. */
+footer:has(.proto-fab){display:grid;grid-template-columns:1fr auto 1fr;align-items:center} /* centres the chip; base flex footer returns when the tool is removed */
+footer:has(.proto-fab) > .label:last-child{justify-self:end}
+.proto-fab{position:relative;z-index:120;display:flex;justify-content:center;padding:12px 20px;margin:-12px -20px} /* padding = larger hover target, margin keeps the layout */
+.proto-chip{appearance:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-cond);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:12px;line-height:16px;
+  padding:6px 12px;border:0;border-radius:var(--sr-radius-pill);color:var(--sr-bg-base);background:var(--sr-text-primary)}
+.proto-chip:hover{opacity:.85}
+.proto-panel{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,4px);width:min(380px,calc(100vw - 32px));padding:16px;display:flex;flex-direction:column;gap:12px;text-align:left;
+  background:var(--sr-text-primary);color:var(--sr-bg-base);border-radius:var(--sr-radius-md);box-shadow:var(--sr-shadow-sheet);
+  opacity:0;visibility:hidden;transition:opacity .15s,transform .15s var(--ease),visibility 0s linear .15s}
+/* tooltip: opens on hover or keyboard focus; a tap toggles .open on touch */
+.proto-fab:not(.snooze):hover .proto-panel,.proto-fab:focus-within .proto-panel,.proto-fab.open .proto-panel{opacity:1;visibility:visible;transform:translate(-50%,0);transition:opacity .15s,transform .15s var(--ease),visibility 0s}
+.proto-panel::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:12px} /* hover bridge to the chip */
+.proto-panel > .label{color:var(--sr-warning)}
+.proto-note{font-size:12px;line-height:16px;color:rgba(243,243,243,.7)}
+.proto-row{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding-top:12px;border-top:1px solid rgba(255,255,255,.14)}
+.proto-row b{font-weight:700;font-size:14px}
+.proto-row code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:rgba(243,243,243,.7)}
+.proto-modes{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px}
+.proto-modes label{position:relative;display:inline-flex;align-items:center;font-size:12px;line-height:16px;padding:4px 8px;border-radius:var(--sr-radius-xs);border:1px solid rgba(255,255,255,.22);cursor:pointer}
+.proto-modes label:hover{border-color:rgba(255,255,255,.5)}
+.proto-modes label:has(:checked){background:var(--sr-bg-base);color:var(--sr-text-primary);border-color:transparent}
+.proto-modes label:has(:focus-visible){outline:2px solid var(--sr-prism-aqua-lit);outline-offset:2px}
+.proto-modes input{position:absolute;opacity:0;width:0;height:0;margin:0}
+.proto-reset{appearance:none;cursor:pointer;font:inherit;font-size:13px;font-weight:600;padding:8px 10px;border-radius:var(--sr-radius-sm);border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--sr-bg-base)}
+.proto-reset:hover{background:rgba(255,255,255,.1)}
+@media (max-width:719px){footer:has(.proto-fab){grid-template-columns:1fr auto}footer:has(.proto-fab) .proto-fab{grid-column:1/-1;order:1;justify-content:flex-start}
+  .proto-panel{position:fixed;left:16px;right:16px;bottom:72px;width:auto;transform:translateY(4px)}
+  .proto-fab:not(.snooze):hover .proto-panel,.proto-fab:focus-within .proto-panel,.proto-fab.open .proto-panel{transform:none}}
+/* ===== end PROTOTYPE ONLY ===== */
+/* ===== Static Grey Gloss: buttons without the glass kit (lite tier via js/fx-tier.js, or no JS) =====
+   Same finish as the live gloss layers, minus ripple/shimmer. */
+.sr-btn:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud,.sr-btn-apply):not(.sr-glass-kit-button){color:var(--sr-text-primary);border:1px solid rgba(0,0,0,.2);
+  background:linear-gradient(-75deg,rgba(255,255,255,.05),rgba(255,255,255,.2),rgba(255,255,255,.05)),rgba(0,0,0,.065);
+  box-shadow:inset 0 1.9375px 1.9375px rgba(0,0,0,.05),inset 0 -1.9375px 1.9375px rgba(255,255,255,.5),inset 0 0 1.55px 3.875px rgba(255,255,255,.2),0 3.875px 1.9375px -1.9375px rgba(0,0,0,.2);
+  backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);transition:background .2s,transform .2s var(--ease)}
+.sr-btn:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud,.sr-btn-apply):not(.sr-glass-kit-button):hover{background:linear-gradient(-75deg,rgba(255,255,255,.08),rgba(255,255,255,.28),rgba(255,255,255,.08)),rgba(0,0,0,.05)}
+.sr-btn:is(.sr-btn-primary,.sr-btn-ghost,.sr-btn-hud,.sr-btn-apply):not(.sr-glass-kit-button):active{transform:translateY(1px)}
+.sr-btn.sr-btn-apply:not(.sr-glass-kit-button){border-color:transparent;
+  background:linear-gradient(-75deg,rgba(255,255,255,.05),rgba(255,255,255,.2),rgba(255,255,255,.05)) padding-box,linear-gradient(rgba(0,0,0,.065),rgba(0,0,0,.065)) padding-box,linear-gradient(var(--sr-bg-base),var(--sr-bg-base)) padding-box,var(--sr-gradient-prism-primary) border-box}
+.box.ok .sr-btn:not(.sr-glass-kit-button){color:var(--sr-bg-base);border-color:rgba(255,255,255,.28);
+  background:linear-gradient(-75deg,rgba(255,255,255,.04),rgba(255,255,255,.14),rgba(255,255,255,.04)),rgba(255,255,255,.08);
+  box-shadow:inset 0 1.9375px 1.9375px rgba(255,255,255,.12),inset 0 -1.9375px 1.9375px rgba(0,0,0,.35),0 3.875px 1.9375px -1.9375px rgba(0,0,0,.5)}
+.box.ok .sr-btn:not(.sr-glass-kit-button):hover{background:linear-gradient(-75deg,rgba(255,255,255,.06),rgba(255,255,255,.2),rgba(255,255,255,.06)),rgba(255,255,255,.12)}
+.fx-lite .bar-inner{cursor:auto}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ================= LANDING ================= -->
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <div class="gate-top">
+    <svg class="logo" role="img" aria-label="speedrun" viewBox="0 0 915 177" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M802.661 58.7714L768.743 118.229C766.86 121.727 762.315 124.768 758.502 124.789H667.458C664.987 124.789 663.796 123.673 663.796 121.443C663.796 120.432 663.995 119.448 664.693 118.236L698.612 58.7783C700.494 55.28 705.04 52.2389 708.852 52.2182H741.368C743.839 52.2182 745.03 53.3335 745.03 55.564C745.03 56.5754 744.832 57.5591 744.134 58.7714L713.952 111.675C713.357 112.888 712.994 113.934 712.994 114.945C712.994 117.169 714.233 118.229 716.711 118.229C718.498 118.229 720.325 117.674 722.31 116.358C724.296 115.042 725.863 113.49 726.952 111.675L757.14 58.7783C759.022 55.28 763.568 52.2389 767.38 52.2182H799.896C802.367 52.2182 803.558 53.3335 803.558 55.564C803.558 56.5754 803.36 57.5591 802.661 58.7714ZM684.49 72.1134L692.109 58.7714C692.807 57.5522 693.005 56.5754 693.005 55.564C693.005 53.3335 691.814 52.2182 689.343 52.2182H598.3C594.487 52.2389 589.941 55.2731 588.059 58.7783L554.14 118.236C553.442 119.455 553.243 120.432 553.243 121.443C553.243 123.673 554.434 124.789 556.906 124.789H589.421C593.234 124.761 597.779 121.727 599.662 118.229L629.843 65.3316C630.938 63.5166 632.506 61.958 634.484 60.6487C636.463 59.3325 638.297 58.7783 640.084 58.7783C642.562 58.7783 643.801 59.8382 643.801 62.0619C643.801 63.0733 643.438 64.1193 642.843 65.3316L638.968 72.1273C638.27 73.3465 638.071 74.3232 638.071 75.3346C638.071 77.5652 639.262 78.6805 641.733 78.6805H674.249C678.062 78.6597 682.607 75.6256 684.49 72.1204V72.1134ZM249.61 58.7645L215.691 118.222C213.808 121.72 209.263 124.761 205.45 124.782L159.929 124.761C156.116 124.782 151.57 127.816 149.688 131.321L125.702 173.37C124.319 175.802 122.936 177 121.547 177C120.657 177 120.109 176.425 119.568 175.601L101.763 144.414C101.271 143.402 100.935 142.079 100.935 140.562C100.935 138.228 101.312 136.205 102.4 134.376L145.553 58.7714C147.436 55.2731 151.981 52.232 155.794 52.2112H246.837C249.309 52.2112 250.5 53.3265 250.5 55.5571C250.5 56.5685 250.301 57.5522 249.603 58.7645H249.61ZM201.302 62.048C201.302 59.8244 200.063 58.7645 197.585 58.7645C195.798 58.7645 193.971 59.3187 191.985 60.6348C190 61.951 188.433 63.5028 187.344 65.3177L160.901 111.662C160.305 112.874 159.942 113.92 159.942 114.931C159.942 117.155 161.181 118.215 163.659 118.215C165.446 118.215 167.274 117.661 169.259 116.344C171.244 115.028 172.812 113.476 173.9 111.662L200.344 65.3177C200.939 64.1054 201.302 63.0594 201.302 62.048ZM104.946 118.222L120.034 91.7801C120.732 90.5609 120.93 89.5841 120.93 88.5727C120.93 86.3421 119.739 85.2268 117.268 85.2268H71.7464C69.2684 85.2268 68.0293 84.167 68.0293 81.9433C68.0293 80.9319 68.3922 79.8859 68.9877 78.6736L76.6066 65.3246C77.7019 63.5097 79.2694 61.951 81.2478 60.6418C83.2261 59.3256 85.0607 58.7714 86.8473 58.7714C89.3253 58.7714 90.5643 59.8313 90.5643 62.0549C90.5643 63.0663 90.2015 64.1124 89.606 65.3246L85.7315 72.1204C85.0333 73.3396 84.8348 74.3163 84.8348 75.3277C84.8348 77.5583 86.0258 78.6736 88.497 78.6736H121.013C124.825 78.6528 129.371 75.6186 131.253 72.1134L138.872 58.7714C139.57 57.5522 139.769 56.5754 139.769 55.564C139.769 53.3335 138.578 52.2182 136.107 52.2182H45.0631C41.2502 52.2389 36.7049 55.2731 34.8224 58.7783L19.7352 85.2199C19.037 86.4391 18.8385 87.4159 18.8385 88.4273C18.8385 90.6579 20.0296 91.7732 22.5008 91.7732H68.0225C70.5005 91.7732 71.7396 92.833 71.7396 95.0567C71.7396 96.0681 71.3767 97.1141 70.7812 98.3264L63.1623 111.675C62.067 113.49 60.4995 115.049 58.5211 116.358C56.5428 117.674 54.7083 118.229 52.9216 118.229C50.4436 118.229 49.2045 117.169 49.2045 114.945C49.2045 113.934 49.5674 112.888 50.1629 111.675L54.0374 104.88C54.7356 103.66 54.9341 102.684 54.9341 101.672C54.9341 99.4417 53.743 98.3264 51.2719 98.3264H18.7563C14.9435 98.3472 10.3981 101.381 8.51563 104.887L0.896743 118.236C0.198514 119.455 0 120.432 0 121.443C0 123.673 1.1911 124.789 3.66228 124.789H94.7058C98.5187 124.768 103.064 121.734 104.946 118.229V118.222ZM333.781 104.873L326.162 118.222C324.279 121.72 319.734 124.761 315.921 124.782H224.877C222.406 124.782 221.215 123.667 221.215 121.436C221.215 120.425 221.414 119.441 222.112 118.229L256.031 58.7714C257.913 55.2731 262.459 52.232 266.271 52.2112H357.315C359.786 52.2112 360.977 53.3265 360.977 55.5571C360.977 56.5685 360.779 57.5522 360.081 58.7645L344.986 85.2199C343.104 88.7182 338.559 91.7593 334.746 91.7801L289.231 91.7593C285.418 91.7801 280.873 94.8143 278.99 98.3195L271.371 111.662C270.776 112.874 270.413 113.92 270.413 114.931C270.413 117.155 271.652 118.215 274.13 118.215C275.917 118.215 277.744 117.661 279.729 116.344C281.715 115.028 283.282 113.476 284.371 111.662L288.252 104.873C290.134 101.374 294.68 98.3333 298.493 98.3126H331.008C333.479 98.3126 334.67 99.4279 334.67 101.658C334.67 102.67 334.472 103.654 333.774 104.866L333.781 104.873ZM289.251 81.9433C289.251 84.167 290.49 85.2268 292.968 85.2268C294.755 85.2268 296.583 84.6727 298.568 83.3565C300.553 82.0403 302.121 80.4886 303.209 78.6736L310.828 65.3246C311.424 64.1124 311.786 63.0663 311.786 62.0549C311.786 59.8313 310.547 58.7714 308.069 58.7714C306.283 58.7714 304.455 59.3256 302.47 60.6418C300.485 61.958 298.917 63.5097 297.829 65.3246L290.21 78.6736C289.614 79.8859 289.251 80.9319 289.251 81.9433ZM444.696 104.873L437.077 118.222C435.195 121.72 430.65 124.761 426.837 124.782H335.793C333.322 124.782 332.131 123.667 332.131 121.436C332.131 120.425 332.329 119.441 333.028 118.229L366.946 58.7714C368.829 55.2731 373.374 52.232 377.187 52.2112H468.231C470.702 52.2112 471.893 53.3265 471.893 55.5571C471.893 56.5685 471.694 57.5522 470.996 58.7645L455.902 85.2199C454.02 88.7182 449.474 91.7593 445.661 91.7801L400.147 91.7593C396.334 91.7801 391.788 94.8143 389.906 98.3195L382.287 111.662C381.691 112.874 381.329 113.92 381.329 114.931C381.329 117.155 382.568 118.215 385.046 118.215C386.832 118.215 388.66 117.661 390.645 116.344C392.63 115.028 394.198 113.476 395.286 111.662L399.168 104.873C401.05 101.374 405.595 98.3333 409.408 98.3126H441.924C444.395 98.3126 445.586 99.4279 445.586 101.658C445.586 102.67 445.388 103.654 444.689 104.866L444.696 104.873ZM400.167 81.9433C400.167 84.167 401.406 85.2268 403.884 85.2268C405.671 85.2268 407.498 84.6727 409.484 83.3565C411.469 82.0403 413.036 80.4886 414.125 78.6736L421.744 65.3246C422.339 64.1124 422.702 63.0663 422.702 62.0549C422.702 59.8313 421.463 58.7714 418.985 58.7714C417.198 58.7714 415.371 59.3256 413.385 60.6418C411.4 61.958 409.833 63.5097 408.744 65.3246L401.125 78.6736C400.53 79.8859 400.167 80.9319 400.167 81.9433ZM590.79 42.6238L547.637 118.229C545.755 121.727 541.209 124.768 537.396 124.789H446.353C443.882 124.789 442.691 123.673 442.691 121.443C442.691 120.432 442.889 119.448 443.587 118.236L477.506 58.7783C479.389 55.28 483.934 52.2389 487.747 52.2182L533.262 52.2389C537.075 52.2182 541.62 49.184 543.502 45.6788L567.489 3.62992C568.871 1.19843 570.254 0 571.644 0C572.534 0 573.081 0.574968 573.622 1.39932L591.427 32.5861C591.92 33.5975 592.255 34.9206 592.255 36.4377C592.255 38.7722 591.879 40.795 590.79 42.6238ZM533.255 62.0619C533.255 59.8382 532.016 58.7783 529.538 58.7783C527.751 58.7783 525.923 59.3325 523.938 60.6487C521.953 61.9649 520.385 63.5166 519.297 65.3316L492.853 111.675C492.258 112.888 491.895 113.934 491.895 114.945C491.895 117.169 493.134 118.229 495.612 118.229C497.399 118.229 499.227 117.674 501.212 116.358C503.197 115.042 504.764 113.49 505.853 111.675L532.296 65.3316C532.892 64.1193 533.255 63.0733 533.255 62.0619ZM910.442 52.2251H819.398C815.586 52.2459 811.04 55.28 809.158 58.7853L775.239 118.242C774.541 119.462 774.342 120.438 774.342 121.45C774.342 123.68 775.533 124.796 778.004 124.796H810.52C814.333 124.775 818.878 121.741 820.761 118.236L850.949 65.3385C852.044 63.5235 853.612 61.9649 855.59 60.6556C857.568 59.3394 859.403 58.7853 861.189 58.7853C863.667 58.7853 864.906 59.8451 864.906 62.0688C864.906 63.0802 864.544 64.1262 863.948 65.3385L833.767 118.242C833.069 119.462 832.87 120.438 832.87 121.45C832.87 123.68 834.061 124.796 836.532 124.796H869.048C872.861 124.775 877.406 121.741 879.289 118.236L913.207 58.7783C913.906 57.5591 914.104 56.5824 914.104 55.571C914.104 53.3404 912.913 52.2251 910.442 52.2251Z" fill="white"/></svg>
+    <span class="label">sr.xp</span>
+  </div>
+  <div class="gate-main">
+    <h1 id="gate-title" data-paint-zone>Exclusive<br class="bA"><br class="bC"> Events<br class="bA"><br class="bB"><br class="bD"> and<br class="bC"> Drops,<br class="bA"> <span class="vt" id="vt" data-paint-text>As<br class="bB"><br class="bC"> They<br class="bA"><br class="bC"> Happen.</span></h1>
+    <form class="gate-form" id="gate-form" novalidate>
+      <p class="lede">Register once. We'll let you in on pop-ups, dinners, and special events from speedrun before anyone else hears about them.</p>
+      <div class="gate-row">
+        <label class="label" for="gate-email">Email</label>
+        <input class="sr-input" id="gate-email" type="email" autocomplete="email" placeholder="you@company.com" required>
+      </div>
+      <p class="err" id="gate-err" hidden></p>
+      <button class="sr-btn sr-btn-hud" type="submit"><span class="sr-prism-material" aria-hidden="true"></span><span class="t">Get access</span></button>
+      <p class="gate-fine">No spam. Unsubscribe anytime.</p>
+    </form>
+  </div>
+  <div class="gate-bot">
+    <span class="label">sr.xp</span>
+    <span class="label">© 2026 Andreessen Horowitz</span>
+  </div>
+</div>
+
+<!-- ================= INSIDE ================= -->
+<header class="bar"><div class="bar-inner">
+  <a class="bar-l" href="#top" aria-label="sr.xp home"><svg class="logo" role="img" aria-label="speedrun" viewBox="0 0 915 177" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M802.661 58.7714L768.743 118.229C766.86 121.727 762.315 124.768 758.502 124.789H667.458C664.987 124.789 663.796 123.673 663.796 121.443C663.796 120.432 663.995 119.448 664.693 118.236L698.612 58.7783C700.494 55.28 705.04 52.2389 708.852 52.2182H741.368C743.839 52.2182 745.03 53.3335 745.03 55.564C745.03 56.5754 744.832 57.5591 744.134 58.7714L713.952 111.675C713.357 112.888 712.994 113.934 712.994 114.945C712.994 117.169 714.233 118.229 716.711 118.229C718.498 118.229 720.325 117.674 722.31 116.358C724.296 115.042 725.863 113.49 726.952 111.675L757.14 58.7783C759.022 55.28 763.568 52.2389 767.38 52.2182H799.896C802.367 52.2182 803.558 53.3335 803.558 55.564C803.558 56.5754 803.36 57.5591 802.661 58.7714ZM684.49 72.1134L692.109 58.7714C692.807 57.5522 693.005 56.5754 693.005 55.564C693.005 53.3335 691.814 52.2182 689.343 52.2182H598.3C594.487 52.2389 589.941 55.2731 588.059 58.7783L554.14 118.236C553.442 119.455 553.243 120.432 553.243 121.443C553.243 123.673 554.434 124.789 556.906 124.789H589.421C593.234 124.761 597.779 121.727 599.662 118.229L629.843 65.3316C630.938 63.5166 632.506 61.958 634.484 60.6487C636.463 59.3325 638.297 58.7783 640.084 58.7783C642.562 58.7783 643.801 59.8382 643.801 62.0619C643.801 63.0733 643.438 64.1193 642.843 65.3316L638.968 72.1273C638.27 73.3465 638.071 74.3232 638.071 75.3346C638.071 77.5652 639.262 78.6805 641.733 78.6805H674.249C678.062 78.6597 682.607 75.6256 684.49 72.1204V72.1134ZM249.61 58.7645L215.691 118.222C213.808 121.72 209.263 124.761 205.45 124.782L159.929 124.761C156.116 124.782 151.57 127.816 149.688 131.321L125.702 173.37C124.319 175.802 122.936 177 121.547 177C120.657 177 120.109 176.425 119.568 175.601L101.763 144.414C101.271 143.402 100.935 142.079 100.935 140.562C100.935 138.228 101.312 136.205 102.4 134.376L145.553 58.7714C147.436 55.2731 151.981 52.232 155.794 52.2112H246.837C249.309 52.2112 250.5 53.3265 250.5 55.5571C250.5 56.5685 250.301 57.5522 249.603 58.7645H249.61ZM201.302 62.048C201.302 59.8244 200.063 58.7645 197.585 58.7645C195.798 58.7645 193.971 59.3187 191.985 60.6348C190 61.951 188.433 63.5028 187.344 65.3177L160.901 111.662C160.305 112.874 159.942 113.92 159.942 114.931C159.942 117.155 161.181 118.215 163.659 118.215C165.446 118.215 167.274 117.661 169.259 116.344C171.244 115.028 172.812 113.476 173.9 111.662L200.344 65.3177C200.939 64.1054 201.302 63.0594 201.302 62.048ZM104.946 118.222L120.034 91.7801C120.732 90.5609 120.93 89.5841 120.93 88.5727C120.93 86.3421 119.739 85.2268 117.268 85.2268H71.7464C69.2684 85.2268 68.0293 84.167 68.0293 81.9433C68.0293 80.9319 68.3922 79.8859 68.9877 78.6736L76.6066 65.3246C77.7019 63.5097 79.2694 61.951 81.2478 60.6418C83.2261 59.3256 85.0607 58.7714 86.8473 58.7714C89.3253 58.7714 90.5643 59.8313 90.5643 62.0549C90.5643 63.0663 90.2015 64.1124 89.606 65.3246L85.7315 72.1204C85.0333 73.3396 84.8348 74.3163 84.8348 75.3277C84.8348 77.5583 86.0258 78.6736 88.497 78.6736H121.013C124.825 78.6528 129.371 75.6186 131.253 72.1134L138.872 58.7714C139.57 57.5522 139.769 56.5754 139.769 55.564C139.769 53.3335 138.578 52.2182 136.107 52.2182H45.0631C41.2502 52.2389 36.7049 55.2731 34.8224 58.7783L19.7352 85.2199C19.037 86.4391 18.8385 87.4159 18.8385 88.4273C18.8385 90.6579 20.0296 91.7732 22.5008 91.7732H68.0225C70.5005 91.7732 71.7396 92.833 71.7396 95.0567C71.7396 96.0681 71.3767 97.1141 70.7812 98.3264L63.1623 111.675C62.067 113.49 60.4995 115.049 58.5211 116.358C56.5428 117.674 54.7083 118.229 52.9216 118.229C50.4436 118.229 49.2045 117.169 49.2045 114.945C49.2045 113.934 49.5674 112.888 50.1629 111.675L54.0374 104.88C54.7356 103.66 54.9341 102.684 54.9341 101.672C54.9341 99.4417 53.743 98.3264 51.2719 98.3264H18.7563C14.9435 98.3472 10.3981 101.381 8.51563 104.887L0.896743 118.236C0.198514 119.455 0 120.432 0 121.443C0 123.673 1.1911 124.789 3.66228 124.789H94.7058C98.5187 124.768 103.064 121.734 104.946 118.229V118.222ZM333.781 104.873L326.162 118.222C324.279 121.72 319.734 124.761 315.921 124.782H224.877C222.406 124.782 221.215 123.667 221.215 121.436C221.215 120.425 221.414 119.441 222.112 118.229L256.031 58.7714C257.913 55.2731 262.459 52.232 266.271 52.2112H357.315C359.786 52.2112 360.977 53.3265 360.977 55.5571C360.977 56.5685 360.779 57.5522 360.081 58.7645L344.986 85.2199C343.104 88.7182 338.559 91.7593 334.746 91.7801L289.231 91.7593C285.418 91.7801 280.873 94.8143 278.99 98.3195L271.371 111.662C270.776 112.874 270.413 113.92 270.413 114.931C270.413 117.155 271.652 118.215 274.13 118.215C275.917 118.215 277.744 117.661 279.729 116.344C281.715 115.028 283.282 113.476 284.371 111.662L288.252 104.873C290.134 101.374 294.68 98.3333 298.493 98.3126H331.008C333.479 98.3126 334.67 99.4279 334.67 101.658C334.67 102.67 334.472 103.654 333.774 104.866L333.781 104.873ZM289.251 81.9433C289.251 84.167 290.49 85.2268 292.968 85.2268C294.755 85.2268 296.583 84.6727 298.568 83.3565C300.553 82.0403 302.121 80.4886 303.209 78.6736L310.828 65.3246C311.424 64.1124 311.786 63.0663 311.786 62.0549C311.786 59.8313 310.547 58.7714 308.069 58.7714C306.283 58.7714 304.455 59.3256 302.47 60.6418C300.485 61.958 298.917 63.5097 297.829 65.3246L290.21 78.6736C289.614 79.8859 289.251 80.9319 289.251 81.9433ZM444.696 104.873L437.077 118.222C435.195 121.72 430.65 124.761 426.837 124.782H335.793C333.322 124.782 332.131 123.667 332.131 121.436C332.131 120.425 332.329 119.441 333.028 118.229L366.946 58.7714C368.829 55.2731 373.374 52.232 377.187 52.2112H468.231C470.702 52.2112 471.893 53.3265 471.893 55.5571C471.893 56.5685 471.694 57.5522 470.996 58.7645L455.902 85.2199C454.02 88.7182 449.474 91.7593 445.661 91.7801L400.147 91.7593C396.334 91.7801 391.788 94.8143 389.906 98.3195L382.287 111.662C381.691 112.874 381.329 113.92 381.329 114.931C381.329 117.155 382.568 118.215 385.046 118.215C386.832 118.215 388.66 117.661 390.645 116.344C392.63 115.028 394.198 113.476 395.286 111.662L399.168 104.873C401.05 101.374 405.595 98.3333 409.408 98.3126H441.924C444.395 98.3126 445.586 99.4279 445.586 101.658C445.586 102.67 445.388 103.654 444.689 104.866L444.696 104.873ZM400.167 81.9433C400.167 84.167 401.406 85.2268 403.884 85.2268C405.671 85.2268 407.498 84.6727 409.484 83.3565C411.469 82.0403 413.036 80.4886 414.125 78.6736L421.744 65.3246C422.339 64.1124 422.702 63.0663 422.702 62.0549C422.702 59.8313 421.463 58.7714 418.985 58.7714C417.198 58.7714 415.371 59.3256 413.385 60.6418C411.4 61.958 409.833 63.5097 408.744 65.3246L401.125 78.6736C400.53 79.8859 400.167 80.9319 400.167 81.9433ZM590.79 42.6238L547.637 118.229C545.755 121.727 541.209 124.768 537.396 124.789H446.353C443.882 124.789 442.691 123.673 442.691 121.443C442.691 120.432 442.889 119.448 443.587 118.236L477.506 58.7783C479.389 55.28 483.934 52.2389 487.747 52.2182L533.262 52.2389C537.075 52.2182 541.62 49.184 543.502 45.6788L567.489 3.62992C568.871 1.19843 570.254 0 571.644 0C572.534 0 573.081 0.574968 573.622 1.39932L591.427 32.5861C591.92 33.5975 592.255 34.9206 592.255 36.4377C592.255 38.7722 591.879 40.795 590.79 42.6238ZM533.255 62.0619C533.255 59.8382 532.016 58.7783 529.538 58.7783C527.751 58.7783 525.923 59.3325 523.938 60.6487C521.953 61.9649 520.385 63.5166 519.297 65.3316L492.853 111.675C492.258 112.888 491.895 113.934 491.895 114.945C491.895 117.169 493.134 118.229 495.612 118.229C497.399 118.229 499.227 117.674 501.212 116.358C503.197 115.042 504.764 113.49 505.853 111.675L532.296 65.3316C532.892 64.1193 533.255 63.0733 533.255 62.0619ZM910.442 52.2251H819.398C815.586 52.2459 811.04 55.28 809.158 58.7853L775.239 118.242C774.541 119.462 774.342 120.438 774.342 121.45C774.342 123.68 775.533 124.796 778.004 124.796H810.52C814.333 124.775 818.878 121.741 820.761 118.236L850.949 65.3385C852.044 63.5235 853.612 61.9649 855.59 60.6556C857.568 59.3394 859.403 58.7853 861.189 58.7853C863.667 58.7853 864.906 59.8451 864.906 62.0688C864.906 63.0802 864.544 64.1262 863.948 65.3385L833.767 118.242C833.069 119.462 832.87 120.438 832.87 121.45C832.87 123.68 834.061 124.796 836.532 124.796H869.048C872.861 124.775 877.406 121.741 879.289 118.236L913.207 58.7783C913.906 57.5591 914.104 56.5824 914.104 55.571C914.104 53.3404 912.913 52.2251 910.442 52.2251Z" fill="white"/></svg><span class="label xp">sr.xp</span></a>
+  <nav class="bar-c" aria-label="Status"><span class="label" id="bar-count"></span><span class="label clock" id="clock"></span></nav>
+  <div class="bar-r"><span class="label who" id="who"></span><button class="label linkbtn" type="button" id="signout">Sign Out</button></div>
+</div></header>
+
+<main id="top">
+  <section class="masthead">
+    <h1>Index<sup id="total"></sup></h1>
+    <div class="masthead-side">
+      <span class="sr-tag sr-tag--success" style="align-self:flex-start"><span class="dot"></span>Live Now</span>
+      <p>Request access to events, dinners, and experiences below. New ones are added as they happen, so check back often.</p>
+    </div>
+  </section>
+
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Filter" id="filters"></div>
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" data-view="list" aria-pressed="true">List</button>
+      <button type="button" data-view="grid" aria-pressed="false">Grid</button>
+    </div>
+  </div>
+
+  <div id="views">
+    <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
+    <ol class="idx" id="idx"></ol>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<footer>
+  <span class="label">sr.xp</span>
+  <!-- PROTOTYPE ONLY — remove for production: simulate each event's state (see README "Prototype controls") -->
+  <div class="proto-fab" id="proto">
+    <div class="proto-panel" role="dialog" aria-label="Prototype controls">
+      <span class="label">Prototype · Remove for Production</span>
+      <p class="proto-note">Pick a state per event to preview it for your signed-in email. Passwords are shown for the Unlock field.</p>
+      <div id="proto-events"></div>
+      <button type="button" class="proto-reset" id="proto-reset">Reset all to Open</button>
+    </div>
+    <button type="button" class="proto-chip" id="proto-chip" aria-expanded="false" aria-controls="proto">Prototype</button>
+  </div>
+  <!-- end PROTOTYPE ONLY -->
+  <span class="label">© 2026 Andreessen Horowitz</span>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<div class="mail" id="mail" role="status" aria-live="polite" hidden></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title" aria-hidden="true">
+  <div class="sheet-head"><span class="label" id="sh-no"></span><button class="sr-btn sr-btn-ghost sr-btn--md" type="button" id="sh-close">Close</button></div>
+  <div class="sheet-body" id="sh-body"></div>
+</aside>
+
+<script>
+const CONTENT = {
+  applyUrl: "https://speedrun.a16z.com/apply",
+  // TEST ONLY: stands in for the sr-everyone@a16z.com alias. Replace with the real member list (server-side) before launch.
+  testApprovedDomains: ["a16z.com"],
+  items: [
+    { n:"FW26.1", img:"assets/la.jpg", type:"Event", title:"Los Angeles Pop-Up", city:"Los Angeles", dateLabel:"Wed Oct 14", date:"2026-10-14", doors:"15:00", end:"19:00", tz:"-07:00", time:"3–7 PM PT", status:"open", art:"prism", password:"STARTLA", approved:["demo@speedrun.com","sr-everyone@a16z.com"], perk:"Limited edition apparel, first come, first served", venue:"TBD: Venue and street address",
+      desc:"One afternoon in LA while SR008 applications are open. Meet the speedrun team, grab some snacks, bring your questions, and walk away with limited edition apparel — first come, first served." },
+    { n:"FW26.2", type:"Event", title:"San Francisco Pop-Up", city:"San Francisco", dateLabel:"Wed Oct 21", date:"2026-10-21", doors:"17:00", end:"21:00", tz:"-07:00", time:"5–9 PM PT", status:"open", art:"prism", password:"STARTSF", approved:["demo@speedrun.com","sr-everyone@a16z.com"], venue:"TBD: Venue and street address",
+      desc:"The second stop. Same format, different city: food, drinks, and open office hours with the people who read your application." },
+    { n:"FW26.3", type:"Event", title:"New York Pop-Up", city:"New York", dateLabel:"Wed Oct 28", date:"2026-10-28", doors:"17:00", end:"21:00", tz:"-04:00", time:"5–9 PM ET", status:"open", art:"prism", password:"STARTNY", approved:["demo@speedrun.com","sr-everyone@a16z.com"], venue:"TBD: Venue and street address",
+      desc:"The last stop of the first run. Bring your cofounder and your questions." },
+    { n:"FW26.4", type:"Unannounced", title:"Unannounced", city:"—", dateLabel:"Soon", status:"soon", art:"sunk", redacted:true,
+      desc:"Members hear about this one first. Watch your inbox." }
+  ],
+  includes: [
+    { k:"Free", t:"Food + drinks", s:"Food trucks and a coffee and matcha cart, all night." },
+    { k:"1:1", t:"The speedrun team", s:"Ask anything about SR008 and what comes after." }
+  ]
+};
+</script>
+<script>
+(function(){
+  const $ = (s,r=document) => r.querySelector(s), $$ = (s,r=document) => Array.from(r.querySelectorAll(s));
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const isTBD = s => typeof s === "string" && s.startsWith("TBD:");
+  const val = s => isTBD(s) ? `<span class="sr-tag sr-tag--tbd">TBD</span> ${esc(s.slice(4).trim())}` : esc(s);
+  const store = { get(k){ try{return JSON.parse(localStorage.getItem("srxp:"+k));}catch(e){return null;} }, set(k,v){ try{localStorage.setItem("srxp:"+k,JSON.stringify(v));}catch(e){} }, del(k){ try{localStorage.removeItem("srxp:"+k);}catch(e){} } };
+  const items = CONTENT.items;
+  const onList = it => { if (store.get("deny:"+it.n)) return false; /* PROTOTYPE ONLY: "Requested" mode — remove with the prototype block */
+    const me = ((store.get("access")||{}).email||"").toLowerCase(); if (!me) return false;
+    return (it.approved||[]).map(x=>x.toLowerCase()).includes(me) || (CONTENT.testApprovedDomains||[]).some(d => me.endsWith("@"+d)) || !!store.get("approve:"+it.n); };
+  const isUnlocked = it => !!store.get("un:"+it.n) && onList(it);
+  const STATUS = { open:["sr-tag--success","Open",true], door:["sr-tag--ink","At the Door"], soon:["","Soon"] };
+  const tag = it => { const [c,l,d] = STATUS[it.status]; const req = store.get("req:"+it.n), un = isUnlocked(it);
+    if (un) return '<span class="sr-tag sr-tag--unlocked">Unlocked</span>';
+    if (req && onList(it)) return '<span class="sr-tag sr-tag--info">Approved</span>';
+    if (req) return '<span class="sr-tag sr-tag--warning">Requested</span>';
+    return `<span class="sr-tag ${c}">${d?'<span class="dot"></span>':''}${l}</span>`; };
+  const art = (it, big) => it.img ? `<div class="art photo"><img src="${it.img}" alt="" loading="lazy"><i class="label">${esc(it.type)}</i></div>` : `<div class="art ${it.art==='prism'?'prism':it.art==='ink'?'ink':''}"><b>${it.redacted?'?':esc(it.n)}</b><i class="label">${esc(it.type)}</i></div>`;
+
+  /* ---- gate ---- */
+  const root = document.documentElement, gate = $("#gate");
+  function openGate(){ gate.hidden = false; gate.classList.remove("leaving"); root.classList.add("gated"); setTimeout(()=>$("#gate-email").focus({preventScroll:true}),50); }
+  function enter(email){ $("#who").textContent = email; if (typeof render === "function" && $("#idx")) try { render(); } catch(e){} }
+  const acc = store.get("access");
+  if (acc && acc.email){ gate.hidden = true; enter(acc.email); } else openGate();
+  $("#gate-form").addEventListener("submit", ev => {
+    ev.preventDefault();
+    const i = $("#gate-email"), e = $("#gate-err"), v = i.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ e.hidden=false; e.textContent="Enter a valid email to get access."; i.setAttribute("aria-invalid","true"); i.classList.remove("shake"); void i.offsetWidth; i.classList.add("shake"); return; }
+    e.hidden = true; i.removeAttribute("aria-invalid");
+    store.set("access",{email:v,at:new Date().toISOString()}); enter(v);
+    gate.classList.add("leaving"); setTimeout(()=>{ gate.hidden = true; root.classList.remove("gated"); window.scrollTo(0,0); },300);
+  });
+  $("#signout").addEventListener("click", () => { store.del("access"); $("#gate-email").value=""; closeSheet(); openGate(); });
+
+  /* ---- clock ---- */
+  const tick = () => { $("#clock").textContent = new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit",timeZoneName:"short"}); };
+  tick(); setInterval(tick, 1000);
+
+  /* ---- index ---- */
+    $("#total").textContent = "(" + String(items.length).padStart(2,"0") + ")";
+  $("#bar-count").textContent = items.filter(i=>i.status==="open").length + " Open Now";
+  function render(){
+    $("#idx").innerHTML = items.map(it => `<li class="row ${it.redacted?'redacted':''}" tabindex="0" role="button" data-n="${it.n}" data-type="${it.type}">
+      <span class="n c">${esc(it.n)}</span><span class="t"><span>${esc(it.title)}</span></span><span class="ty c">${esc(it.type)}</span><span class="ci c">${esc(it.city)}</span><span class="dt c">${esc(it.dateLabel)}</span><span class="st">${tag(it)}</span></li>`).join("");
+    $("#grid").innerHTML = items.map(it => `<button type="button" class="tile" data-n="${it.n}" data-type="${it.type}">
+      <div class="tile-top"><span class="label">${esc(it.n)}</span>${tag(it)}</div>${art(it)}
+      <h3>${it.redacted?'Unannounced':esc(it.title)}</h3><div class="meta"><span class="label">${esc(it.city)}</span><span class="label">${esc(it.dateLabel)}</span></div></button>`).join("");
+    applyFilter();
+    buildTicker();
+  }
+  /* ticker: every announced event (name · date · time · venue/city), repeated to fill, then doubled for a seamless loop */
+  function buildTicker(){
+    const t = $("#ticker"); if (!t) return;
+    const entries = items.filter(it => !it.redacted).map(it => {
+      const bits = [it.title, it.dateLabel, it.time, isTBD(it.venue||"TBD:") ? it.city : `${it.venue}, ${it.city}`].filter(Boolean).map(esc);
+      return `<span class="ticker-item">${bits.join('<i>·</i>')}<b></b></span>`;
+    });
+    if (!entries.length) { t.innerHTML = ""; return; }
+    t.innerHTML = entries.join("");
+    const one = t.scrollWidth || 1, need = Math.ceil((t.parentElement.clientWidth || innerWidth) / one) + 1;
+    const group = entries.join("").repeat(need);
+    t.innerHTML = group + group;               // two identical halves: translateX(-50%) → 0 loops seamlessly
+    t.style.setProperty("--ticker-dur", `${Math.round((one * need) / 50)}s`); // ~50px/s at any length
+  }
+  let tickerT = 0;
+  addEventListener("resize", () => { clearTimeout(tickerT); tickerT = setTimeout(buildTicker, 200); });
+  const types = ["All", ...new Set(items.map(i=>i.type))];
+  let filter = "All";
+  $("#filters").innerHTML = types.map(t => `<button type="button" data-f="${t}" aria-pressed="${t==='All'}">${t}<sup>${t==='All'?items.length:items.filter(i=>i.type===t).length}</sup></button>`).join("");
+  function applyFilter(){ $$(".row,.tile").forEach(el => el.classList.toggle("is-hidden", filter!=="All" && el.dataset.type!==filter)); }
+  $("#filters").addEventListener("click", ev => { const b = ev.target.closest("[data-f]"); if(!b) return; filter = b.dataset.f; $$("#filters button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); applyFilter(); });
+  $$("[data-view]").forEach(b => b.addEventListener("click", () => { $$("[data-view]").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); $("#views").classList.toggle("view-grid", b.dataset.view==="grid"); store.set("view", b.dataset.view); }));
+  if (store.get("view")==="grid") $('[data-view="grid"]').click();
+
+  /* ---- sheet ---- */
+  let cur = null;
+  function calUrl(e){ const f = t => new Date(`${e.date}T${t}:00${e.tz}`).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent("speedrun — "+e.title)+"&dates="+f(e.doors)+"/"+f(e.end)+"&location="+encodeURIComponent(isTBD(e.venue)?e.city:e.venue); }
+  function sheetHTML(it){
+    const req = store.get("req:"+it.n), un = isUnlocked(it);
+    let action = "";
+    if (it.type === "Event"){
+      action = un ? `<div class="box ok"><span class="label">Unlocked · You're Approved</span><div class="ok-info"><p>${val(it.venue)}</p><p>Bring a photo ID. Doors at ${esc(it.time.split("–")[0])} PM.</p></div><a class="sr-btn sr-btn-hud sr-btn--md" href="${calUrl(it)}" target="_blank" rel="noopener" style="align-self:flex-start"><span class="sr-prism-material" aria-hidden="true"></span><span class="t">Add to Calendar</span></a></div>`
+        : `<div class="box">
+          <div class="box-head"><span class="label">${req ? (onList(it) ? 'Approved' : 'Requested') : 'Request Access'}</span><p>${req ? (onList(it) ? 'You\'re approved. We just emailed your password to ' + esc((store.get("access")||{}).email||"you") + '. Enter it below to see the address.' : 'You\'re on the list. Approved guests get a password by email before the event.') : 'Capacity is limited. Approvals are based on your SR008 application, so use the same email.'}</p></div>
+          ${req && onList(it) ? '' : `<div class="cta-pair${req ? ' one' : ''}">${req ? '' : '<button class="sr-btn sr-btn-primary" type="button" id="sh-req">Request access</button>'}<a class="sr-btn sr-btn-apply" href="${CONTENT.applyUrl}" target="_blank" rel="noopener">Start your SR008 app</a></div>`}
+          <form class="pw-inline" id="sh-pw" novalidate><input class="sr-input" id="sh-pw-in" placeholder="${req && onList(it) ? 'Enter your password' : 'Have a password?'}" aria-label="Event password" autocomplete="off" spellcheck="false"><button class="sr-btn sr-btn-ghost sr-btn--md" type="submit">Unlock</button></form><p class="err" id="sh-err" hidden></p>
+        </div>`;
+    } else if (it.type === "Object") action = `<div class="box"><span class="label">How to Get One</span><p style="font-weight:600">Request access to any event above. Pick up at the door while supplies last.</p></div>`;
+    else action = `<div class="box"><span class="label">Members First</span><p style="font-weight:600">You're registered. We'll email you the moment this goes live.</p></div>`;
+    const rows = it.type==="Event" ? [["City",esc(it.city)],["Date",esc(it.dateLabel)+", 2026"],["Time",esc(it.time)],["Where", un?val(it.venue):"Revealed to approved guests"],["Status",tag(it)]]
+      : it.type==="Object" ? [["Where",esc(it.city)],["Quantity",esc(it.qty)],["Price","Free"],["Status",tag(it)]] : [["Status",tag(it)]];
+    return `${art(it)}<div style="display:flex;flex-direction:column;gap:12px"><span class="label">${esc(it.type)}</span><h2 id="sh-title">${esc(it.title)}</h2><p class="desc">${esc(it.desc)}</p></div>
+      <dl class="kv">${rows.map(([k,v])=>`<dt class="c">${k}</dt><dd>${v}</dd>`).join("")}</dl>
+      ${it.type==="Event" ? `<div style="display:flex;flex-direction:column;gap:8px"><span class="label">What's There</span><ul class="includes">${CONTENT.includes.concat(it.perk ? [{ k:"Drop", t:"Limited edition apparel", s:"First come, first served at the door. One per guest." }] : []).map(x=>`<li><b>${esc(x.k)}</b><span><b style="font-size:15px;letter-spacing:-.01em;font-weight:700">${esc(x.t)}</b><br><span class="muted">${esc(x.s)}</span></span></li>`).join("")}</ul></div>` : ""}
+      ${action}`;
+  }
+  function openSheet(n){
+    const it = items.find(i=>i.n===n); if(!it) return; cur = it;
+    $("#sh-no").textContent = it.n; $("#sh-body").innerHTML = sheetHTML(it);
+    $("#sheet").classList.add("on"); $("#sheet").setAttribute("aria-hidden","false"); $("#scrim").classList.add("on");
+    wire(it); setTimeout(()=>$("#sh-close").focus({preventScroll:true}),50);
+  }
+  function wire(it){
+    const r = $("#sh-req"); if (r) r.addEventListener("click", () => { store.set("req:"+it.n, true); refresh(); if (onList(it)) setTimeout(() => mail(it), 1200); });
+    const f = $("#sh-pw"); if (f) f.addEventListener("submit", ev => { ev.preventDefault(); const i = $("#sh-pw-in"), pw = i.value.trim().toUpperCase().replace(/\s+/g,"");
+      const me = ((store.get("access")||{}).email||"").toLowerCase();
+      if (pw === it.password && !onList(it)){ const e=$("#sh-err"); e.hidden=false; e.textContent=`That password is only valid for approved guests, and ${me} isn't on the list for ${it.city} yet. Make sure your SR008 app uses this email.`; i.classList.remove("shake"); void i.offsetWidth; i.classList.add("shake"); return; }
+      if (pw !== it.password){ const e=$("#sh-err"); e.hidden=false; e.textContent="That password doesn't match this event. Check your approval email."; i.classList.remove("shake"); void i.offsetWidth; i.classList.add("shake"); return; }
+      store.set("un:"+it.n, true); refresh(); });
+  }
+  function refresh(){ render(); if (cur){ $("#sh-body").innerHTML = sheetHTML(cur); wire(cur); } }
+  function mail(it){
+    const m = $("#mail"), me = (store.get("access")||{}).email||"";
+    m.innerHTML = `<div class="mail-top"><span class="label">New Email · speedrun</span><button type="button" class="linkbtn label" id="mail-x">Dismiss</button></div>
+      <b>You're approved for ${esc(it.title)}</b><p class="muted">To ${esc(me)} — ${esc(it.dateLabel)}, ${esc(it.time)}. Your event password is</p><code>${esc(it.password)}</code><p class="muted" style="font-size:13px">Enter it on the event page to see the address. Please don't share it — it only works for your email.</p>`;
+    m.hidden = false; requestAnimationFrame(() => m.classList.add("on"));
+    $("#mail-x").addEventListener("click", () => { m.classList.remove("on"); setTimeout(() => m.hidden = true, 300); });
+  }
+  function closeSheet(){ $("#sheet").classList.remove("on"); $("#sheet").setAttribute("aria-hidden","true"); $("#scrim").classList.remove("on"); cur = null; }
+  document.addEventListener("click", ev => { const t = ev.target.closest(".row,.tile"); if (t) openSheet(t.dataset.n); });
+  $("#idx").addEventListener("keydown", ev => { const t = ev.target.closest(".row"); if (t && (ev.key==="Enter"||ev.key===" ")){ ev.preventDefault(); openSheet(t.dataset.n); } });
+  $("#sh-close").addEventListener("click", closeSheet); $("#scrim").addEventListener("click", closeSheet);
+  document.addEventListener("keydown", ev => { if (ev.key==="Escape") closeSheet(); });
+
+  /* ===== PROTOTYPE ONLY — remove for production (with the footer .proto-fab markup and CSS) =====
+     Sets the same localStorage flags the real flow sets: req:<n>, approve:<n>, un:<n>. */
+  const proto = $("#proto");
+  if (proto) {
+    const MODES = [["open","Open"],["requested","Requested"],["approved","Approved"],["unlocked","Unlocked"]];
+    const modeOf = i => isUnlocked(i) ? "unlocked" : store.get("req:"+i.n) ? (onList(i) ? "approved" : "requested") : "open";
+    const drawProto = () => {
+      $("#proto-events").innerHTML = items.filter(i => i.password).map(i => `<div class="proto-row">
+        <b>${esc(i.city)}</b><code>${esc(i.password)}</code>
+        <div class="proto-modes" role="radiogroup" aria-label="${esc(i.city)} state">${MODES.map(([v,l]) =>
+          `<label><input type="radio" name="proto-${esc(i.n)}" value="${v}" data-n="${esc(i.n)}" ${modeOf(i)===v ? "checked" : ""}>${l}</label>`).join("")}</div>
+      </div>`).join("");
+    };
+    $("#proto-events").addEventListener("change", ev => {
+      const r = ev.target.closest('input[type="radio"][data-n]'); if (!r) return;
+      const n = r.dataset.n, v = r.value, set = (k, on) => on ? store.set(k+n, true) : store.del(k+n);
+      set("req:", v !== "open"); set("approve:", v === "approved" || v === "unlocked"); set("un:", v === "unlocked"); set("deny:", v === "requested");
+      refresh(); drawProto();
+    });
+    $("#proto-reset").addEventListener("click", () => {
+      items.forEach(i => ["req:","un:","approve:","deny:"].forEach(k => store.del(k+i.n)));
+      $("#mail").hidden = true; refresh(); drawProto();
+    });
+    // hover/focus open it via CSS; a tap toggles it on touch screens
+    // hover opens; click pins it open. Closing by click also snoozes hover until the pointer leaves, so it doesn't pop straight back.
+    $("#proto-chip").addEventListener("click", () => { const open = !proto.classList.contains("open"); proto.classList.toggle("open", open); proto.classList.toggle("snooze", !open); $("#proto-chip").setAttribute("aria-expanded", String(open)); });
+    proto.addEventListener("mouseleave", () => proto.classList.remove("snooze"));
+    document.addEventListener("click", ev => { if (!proto.contains(ev.target)) { proto.classList.remove("open"); $("#proto-chip").setAttribute("aria-expanded", "false"); } });
+    proto.addEventListener("mouseenter", drawProto);
+    drawProto();
+  }
+  /* ===== end PROTOTYPE ONLY ===== */
+
+  render();
+})();
+</script>
+<script src="vendor/fluid/fluid-header.js"></script>
+<script src="js/paint-text.js"></script>
+<script src="js/gloss.js"></script>
+<script src="js/glass-preset.js"></script>
+<script src="vendor/glass/glass-effects.global.js"></script>
+<script src="js/glass-buttons.js"></script>
+<script src="js/bar-ripple.js"></script>
+</body>
+</html>
